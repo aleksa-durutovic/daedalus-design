@@ -1,0 +1,27 @@
+{
+  "color": {
+    "background": "#0B0B10",
+    "surface": "#14141C",
+    "line": "#26262F",
+    "text": "#F5F5F7",
+    "muted": "#B4B4C0",
+    "accent": "#8B5CF6",
+    "accentSoft": "#A78BFA",
+    "accentAlt": "#22D3EE"
+  },
+  "_color_note": "8 values = 1 neutral ramp (background/surface/line/text/muted) + violet accent with an AA-safe soft variant for small text + cyan as the gradient partner. Palette specified by the approved project brief.",
+  "type": {
+    "display": "Sora, ui-sans-serif, system-ui, sans-serif",
+    "body": "Inter, ui-sans-serif, system-ui, sans-serif",
+    "utility": "none (two families total)",
+    "scale_ratio": 1.25
+  },
+  "layout": {
+    "grid": "single fluid column, content max-width 1152px, 24px side padding",
+    "max_width": "1152px",
+    "spacing_scale": [4, 8, 12, 16, 24, 32, 48, 64, 96, 128]
+  },
+  "voice": "Confident and concise. No hype, no exclamation points. Serbian first, English second.",
+  "signature_element": "Beveled top-right corners (clip-path polygon) on cards and primary buttons — a literal nod to the name Beverly. Boldness is spent here; everything else stays quiet.",
+  "css_architecture": "utility-first"
+}
