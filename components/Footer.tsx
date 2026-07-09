@@ -1,0 +1,46 @@
+import type { Dictionary } from "@/types/content";
+import { t } from "@/content/i18n";
+import { socialLinks } from "@/content/social";
+
+interface FooterProps {
+  dict: Dictionary;
+}
+
+export default function Footer({ dict }: FooterProps) {
+  const year = new Date().getFullYear();
+
+  return (
+    <footer className="border-t border-line">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-10 sm:flex-row">
+        <p className="text-sm text-muted">
+          © {year} Beverly Design. {t(dict, "footer.rights")}
+        </p>
+
+        <ul className="flex items-center gap-5">
+          {socialLinks.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <a
+          href="#top"
+          className="flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="h-4 w-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5M5 12l7-7 7 7" />
+          </svg>
+          {t(dict, "footer.backToTop")}
+        </a>
+      </div>
+    </footer>
+  );
+}
