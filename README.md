@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Beverly Design
 
-## Getting Started
+Marketing website for **Beverly Design** — a studio that designs and builds websites.
+Bilingual (Serbian default / English), dark, single-page, fully offline-capable.
 
-First, run the development server:
+## Stack
+
+- Next.js (App Router) + TypeScript (strict)
+- Tailwind CSS v4 (CSS-first tokens in `app/globals.css`, mirrored in `design-tokens.json`)
+- Framer Motion (scroll reveals, stat counters — respects `prefers-reduced-motion`)
+- Self-hosted variable fonts (Sora + Inter, `public/fonts/`) — zero external requests
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## i18n
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Default locale `sr`; switch via the SR/EN toggle in the nav.
+- The locale lives in a `locale` cookie, read **server-side** (`lib/getLocale.ts`) —
+  no client-side detection, no hydration mismatch.
+- All copy lives in `content/i18n.ts`; the `en` object is typed against the `sr`
+  key set, so a missing translation is a compile error.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Before launch (TODO)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Replace the placeholder email/domain in `content/social.ts` (`CONTACT_EMAIL`).
+- Replace placeholder social profile URLs in `content/social.ts`.
+- Swap placeholder portfolio projects/copy with real work.
