@@ -8,6 +8,7 @@ import Portfolio from "@/components/Portfolio";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import SectionBackdrop from "@/components/SectionBackdrop";
 
 export default async function Home() {
   const locale = await getLocale();
@@ -23,9 +24,16 @@ export default async function Home() {
         <Services dict={dict} />
         <Portfolio dict={dict} />
         <About dict={dict} />
-        <Contact dict={dict} />
+        {/* Contact + footer share the last full-screen snap section — a
+            footer-only snap target would strand a mostly-empty screen. */}
+        <section className="relative flex h-svh snap-start snap-always flex-col overflow-hidden">
+          <SectionBackdrop variant="reticle" subtle />
+          <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <Contact dict={dict} />
+          </div>
+          <Footer dict={dict} className="relative z-10" />
+        </section>
       </main>
-      <Footer dict={dict} />
     </MotionConfig>
   );
 }

@@ -6,7 +6,7 @@ import type { Dictionary, Locale } from '@/types/content';
  * is a compile error, not a silent runtime gap.
  */
 const sr = {
-  'meta.title': 'Beverly Design — Studio za dizajn i izradu web sajtova',
+  'meta.title': 'Daedalus Design — Studio za dizajn i izradu web sajtova',
   'meta.description':
     'Pravimo brze, moderne i prepoznatljive web sajtove koji vašem biznisu donose klijente.',
 
@@ -16,6 +16,11 @@ const sr = {
   'nav.portfolio': 'Portfolio',
   'nav.about': 'O nama',
   'nav.contact': 'Kontakt',
+  'nav.menuOpen': 'Otvori meni',
+  'nav.menuClose': 'Zatvori meni',
+
+  'holo.open': 'Otvori',
+  'holo.close': 'Zatvori pregled',
 
   'toggle.label.sr': 'Prebaci na srpski',
   'toggle.label.en': 'Prebaci na engleski',
@@ -60,7 +65,7 @@ const sr = {
   'about.kicker': 'O nama',
   'about.title': 'Mali studio, visoka merila',
   'about.body':
-    'Beverly Design vodi jednostavna ideja: svaki biznis zaslužuje sajt koji izgleda ozbiljno i radi besprekorno. Radimo blisko sa klijentima, od prve skice do lansiranja — bez šablona i bez kompromisa.',
+    'Daedalus Design vodi jednostavna ideja: svaki biznis zaslužuje sajt koji izgleda ozbiljno i radi besprekorno. Radimo blisko sa klijentima, od prve skice do lansiranja — bez šablona i bez kompromisa.',
 
   'stat.projects.label': 'Završenih projekata',
   'stat.clients.label': 'Zadovoljnih klijenata',
@@ -81,7 +86,7 @@ const sr = {
 } as const;
 
 const en = {
-  'meta.title': 'Beverly Design — Web design & development studio',
+  'meta.title': 'Daedalus Design — Web design & development studio',
   'meta.description':
     'We build fast, modern, unmistakable websites that bring your business clients.',
 
@@ -91,6 +96,11 @@ const en = {
   'nav.portfolio': 'Portfolio',
   'nav.about': 'About',
   'nav.contact': 'Contact',
+  'nav.menuOpen': 'Open menu',
+  'nav.menuClose': 'Close menu',
+
+  'holo.open': 'Open',
+  'holo.close': 'Close preview',
 
   'toggle.label.sr': 'Switch to Serbian',
   'toggle.label.en': 'Switch to English',
@@ -134,7 +144,7 @@ const en = {
   'about.kicker': 'About',
   'about.title': 'A small studio with high standards',
   'about.body':
-    'Beverly Design runs on a simple idea: every business deserves a website that looks serious and works flawlessly. We work closely with clients from first sketch to launch — no templates, no compromises.',
+    'Daedalus Design runs on a simple idea: every business deserves a website that looks serious and works flawlessly. We work closely with clients from first sketch to launch — no templates, no compromises.',
 
   'stat.projects.label': 'Projects delivered',
   'stat.clients.label': 'Happy clients',

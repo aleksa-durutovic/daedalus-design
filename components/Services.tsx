@@ -4,9 +4,12 @@ import { motion } from "framer-motion";
 import type { Dictionary } from "@/types/content";
 import { t } from "@/content/i18n";
 import { services } from "@/content/services";
+import SectionBackdrop from "@/components/SectionBackdrop";
 
 interface ServicesProps {
   dict: Dictionary;
+  /** Preview mode (holo windows/overlay): no id, no snap, no backdrop. */
+  mini?: boolean;
 }
 
 /** Inline stroke icons keyed by ServiceItem.icon (markup, not data). */
@@ -34,48 +37,58 @@ const ICONS: Record<string, React.ReactElement> = {
   ),
 };
 
-export default function Services({ dict }: ServicesProps) {
+export default function Services({ dict, mini }: ServicesProps) {
   return (
-    <section id="services" className="py-24 md:py-32">
-      <div className="mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <p className="mb-3 font-display text-xs font-semibold uppercase tracking-[0.25em] text-violet-soft">
-            {t(dict, "services.kicker")}
-          </p>
-          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            {t(dict, "services.title")}
-          </h2>
-          <p className="mt-4 text-muted">{t(dict, "services.sub")}</p>
-        </motion.div>
+    <section
+      id={mini ? undefined : "services"}
+      className={
+        mini
+          ? "relative h-full overflow-hidden"
+          : "relative h-svh snap-start snap-always overflow-hidden"
+      }
+    >
+      {!mini && <SectionBackdrop variant="reticle" />}
+      {/* m-auto inside a scrollable flex column: centered when it fits,
+          scrollable (not clipped) on screens too short for the content. */}
+      <div className="relative z-10 flex h-full flex-col overflow-y-auto">
+        <div className="m-auto w-full max-w-6xl px-6 pb-12 pt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <p className="mb-3 font-display text-xs font-semibold uppercase tracking-[0.25em] text-copper-deep">
+              {t(dict, "services.kicker")}
+            </p>
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              {t(dict, "services.title")}
+            </h2>
+            <p className="mt-4 text-muted">{t(dict, "services.sub")}</p>
+          </motion.div>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.titleKey}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
-              className="group bevel bg-line p-px transition-colors hover:bg-violet/50"
-            >
-              <div className="bevel flex h-full flex-col gap-4 bg-surface p-6">
-                <span className="bevel-sm flex h-11 w-11 items-center justify-center bg-night text-violet-soft transition-colors group-hover:text-cyan">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {services.map((service, index) => (
+              <motion.div
+                key={service.titleKey}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
+                className="group flex flex-col gap-4 rounded-2xl bg-surface p-6 ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-copper/50"
+              >
+                <span className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl text-copper-soft">
                   {ICONS[service.icon]}
                 </span>
-                <h3 className="font-display text-lg font-semibold">
+                <h3 className="font-display text-lg font-semibold text-night">
                   {t(dict, service.titleKey)}
                 </h3>
-                <p className="text-sm leading-relaxed text-muted">
+                <p className="text-sm leading-relaxed text-night/65">
                   {t(dict, service.descKey)}
                 </p>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

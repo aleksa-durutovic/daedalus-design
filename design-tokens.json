@@ -1,15 +1,15 @@
 {
   "color": {
-    "background": "#0B0B10",
-    "surface": "#14141C",
-    "line": "#26262F",
-    "text": "#F5F5F7",
-    "muted": "#B4B4C0",
-    "accent": "#8B5CF6",
-    "accentSoft": "#A78BFA",
-    "accentAlt": "#22D3EE"
+    "background": "#ECE9E1",
+    "surface": "#1B1F27",
+    "line": "#D9D4C9",
+    "text": "#232833",
+    "muted": "#7D7A70",
+    "accent": "#C08552",
+    "accentDeep": "#96602F",
+    "accentSoft": "#E2AD7A"
   },
-  "_color_note": "8 values = 1 neutral ramp (background/surface/line/text/muted) + violet accent with an AA-safe soft variant for small text + cyan as the gradient partner. Palette specified by the approved project brief.",
+  "_color_note": "Daedalus Design palette taken from the logo + landing artwork: warm paper background, deep navy-charcoal panels (the logo's navy), navy ink text, and the logo's brushed copper as the single chromatic accent (deep variant is AA-safe for small text on paper; soft variant is for text on dark panels).",
   "type": {
     "display": "Sora, ui-sans-serif, system-ui, sans-serif",
     "body": "Inter, ui-sans-serif, system-ui, sans-serif",
@@ -17,11 +17,11 @@
     "scale_ratio": 1.25
   },
   "layout": {
-    "grid": "single fluid column, content max-width 1152px, 24px side padding",
+    "grid": "full-viewport snap sections (100svh, scroll-snap mandatory), content max-width 1152px, 24px side padding",
     "max_width": "1152px",
     "spacing_scale": [4, 8, 12, 16, 24, 32, 48, 64, 96, 128]
   },
   "voice": "Confident and concise. No hype, no exclamation points. Serbian first, English second.",
-  "signature_element": "Beveled top-right corners (clip-path polygon) on cards and primary buttons — a literal nod to the name Beverly. Boldness is spent here; everything else stays quiet.",
+  "signature_element": "Liquid-glass surfaces (Apple-style translucent blur) on the floating pill navbar, buttons and card chrome, with the logo's copper as hover/accent color. Rounded-full pills and rounded-2xl cards throughout.",
   "css_architecture": "utility-first"
 }

@@ -55,14 +55,22 @@
    ========================================================================== */
 
 @theme {
-  --color-night: #0b0b10;
-  --color-surface: #14141c;
-  --color-line: #26262f;
-  --color-fg: #f5f5f7;
-  --color-muted: #b4b4c0;
-  --color-violet: #8b5cf6;
-  --color-violet-soft: #a78bfa;
-  --color-cyan: #22d3ee;
+  /* Daedalus Design palette (from the logo + landing artwork):
+     warm paper background, deep navy-charcoal panels (the logo's navy),
+     and the logo's copper as the single chromatic accent.
+     Legacy token NAMES (violet/cyan) are kept as aliases so untouched
+     utilities keep compiling — they now resolve to copper tones. */
+  --color-night: #ece9e1; /* paper — page bg + light text on dark panels */
+  --color-surface: #1b1f27; /* navy-charcoal — dark card panels */
+  --color-line: #d9d4c9; /* hairline rules on paper */
+  --color-fg: #232833; /* navy ink — body text on paper */
+  --color-muted: #7d7a70; /* warm gray — secondary text on paper */
+  --color-copper: #c08552; /* logo copper — accents, hover states */
+  --color-copper-deep: #96602f; /* AA-safe copper for small text on paper */
+  --color-copper-soft: #e2ad7a; /* light copper for text on dark panels */
+  --color-violet: #c08552; /* legacy alias → copper */
+  --color-violet-soft: #96602f; /* legacy alias → deep copper */
+  --color-cyan: #96602f; /* legacy alias → deep copper (focus rings) */
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, Arial, sans-serif;
@@ -74,8 +82,9 @@
    ========================================================================== */
 
 html {
-  scroll-padding-top: 6rem; /* offset anchor jumps under the sticky nav */
-  color-scheme: dark;
+  /* No scroll-padding: sections are full-viewport snap targets and the nav
+     floats over them, so snap/anchor alignment must be the true top. */
+  color-scheme: light;
 }
 
 /* Smooth scroll only for users who allow motion (a11y rule #1) */
@@ -94,8 +103,8 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-violet) 45%, transparent);
-  color: #ffffff;
+  background: color-mix(in oklab, var(--color-fg) 22%, transparent);
+  color: var(--color-fg);
 }
 
 /* Global visible focus baseline; key controls also add explicit
@@ -105,49 +114,178 @@ body {
   outline-offset: 3px;
 }
 
-/* ==========================================================================
-   Signature element: beveled top-right corner (Beverly → bevel).
-   NOTE: clip-path clips outlines — interactive elements must put the bevel
-   on an inner layer and keep the focus ring on the unclipped parent.
-   ========================================================================== */
-
-@utility bevel {
-  clip-path: polygon(
-    0 0,
-    calc(100% - 20px) 0,
-    100% 20px,
-    100% 100%,
-    0 100%
-  );
-}
-
-@utility bevel-sm {
-  clip-path: polygon(
-    0 0,
-    calc(100% - 12px) 0,
-    100% 12px,
-    100% 100%,
-    0 100%
-  );
-}
-
-/* Violet → cyan brand gradient text */
+/* Copper gradient text (logo's brushed-copper D) */
 @utility text-gradient {
   background-image: linear-gradient(
     95deg,
-    var(--color-violet-soft),
-    var(--color-cyan)
+    var(--color-copper-deep),
+    var(--color-copper)
   );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* Subtle dot grid backdrop (hero) */
-@utility bg-dots {
-  background-image: radial-gradient(
-    rgba(245, 245, 247, 0.07) 1px,
-    transparent 1px
+/* ==========================================================================
+   Liquid glass (Apple-style translucent surfaces).
+   Light variants sit on the paper/artwork; the -dark variant sits on the
+   navy-charcoal panels. All rely on backdrop-filter — the gradient bg keeps
+   them legible where backdrop-filter is unsupported.
+   ========================================================================== */
+
+@utility liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(255, 255, 255, 0.44)
   );
-  background-size: 24px 24px;
+  backdrop-filter: blur(20px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 8px 32px rgba(35, 40, 51, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+@utility liquid-glass-pill {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.22)
+  );
+  backdrop-filter: blur(14px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 4px 20px rgba(35, 40, 51, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+@utility liquid-glass-button {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.58)
+  );
+  backdrop-filter: blur(16px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 6px 24px rgba(35, 40, 51, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 10px 30px rgba(35, 40, 51, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+}
+
+@utility liquid-glass-dark {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.06)
+  );
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.22),
+      rgba(255, 255, 255, 0.1)
+    );
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* ==========================================================================
+   Decorative background system — "architect's blueprint".
+   Every non-hero section shares this so the whole page reads as one world:
+   a drafting grid + copper glow base, plus a per-section line motif that
+   draws itself in on scroll. All layers are aria-hidden and motion-gated.
+   ========================================================================== */
+
+@keyframes decor-breathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+
+@keyframes decor-float {
+  0% { transform: translateY(8px); opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { transform: translateY(-36px); opacity: 0; }
+}
+
+@keyframes decor-drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-2.4%, 2.4%); }
+}
+
+/* Fine 34px drafting grid with a heavier 170px major grid over it. */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, rgba(35, 40, 51, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35, 40, 51, 0.05) 1px, transparent 1px),
+    linear-gradient(to right, rgba(35, 40, 51, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35, 40, 51, 0.08) 1px, transparent 1px);
+  background-size: 34px 34px, 34px 34px, 170px 170px, 170px 170px;
+}
+
+/* Warm gradient wash so the base is never a single flat fill. */
+.paper-wash {
+  background:
+    radial-gradient(115% 75% at 88% -5%, rgba(192, 133, 82, 0.1), transparent 55%),
+    radial-gradient(95% 70% at -5% 105%, rgba(35, 40, 51, 0.05), transparent 60%),
+    linear-gradient(178deg, #efece5 0%, #e7e3d9 100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .decor-breathe { animation: decor-breathe 9s ease-in-out infinite; }
+  .decor-drift { animation: decor-drift 26s ease-in-out infinite; }
+  .decor-particle { animation: decor-float linear infinite; }
+}
+
+/* ==========================================================================
+   Holo deck — the hero's floating hologram windows (teal glass, matching
+   the table screen in the artwork) and the light beams from the hands.
+   ========================================================================== */
+
+.holo-glass {
+  background: linear-gradient(
+    165deg,
+    rgba(140, 216, 211, 0.24),
+    rgba(27, 31, 39, 0.14) 55%,
+    rgba(140, 216, 211, 0.1)
+  );
+  backdrop-filter: blur(6px) saturate(1.25);
+  border: 1px solid rgba(140, 216, 211, 0.5);
+  box-shadow:
+    0 8px 40px rgba(27, 31, 39, 0.28),
+    0 0 26px rgba(111, 211, 207, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* CRT-like scanlines laid over the live preview */
+.holo-scan {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.055) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+@keyframes holo-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .beam-pulse { animation: holo-pulse 3.4s ease-in-out infinite; }
 }

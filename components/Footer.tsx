@@ -4,16 +4,17 @@ import { socialLinks } from "@/content/social";
 
 interface FooterProps {
   dict: Dictionary;
+  className?: string;
 }
 
-export default function Footer({ dict }: FooterProps) {
+export default function Footer({ dict, className = "" }: FooterProps) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-line">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-10 sm:flex-row">
+    <footer className={`border-t border-line ${className}`}>
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row">
         <p className="text-sm text-muted">
-          © {year} Beverly Design. {t(dict, "footer.rights")}
+          © {year} Daedalus Design. {t(dict, "footer.rights")}
         </p>
 
         <ul className="flex items-center gap-5">

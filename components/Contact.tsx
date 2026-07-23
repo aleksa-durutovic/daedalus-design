@@ -8,6 +8,8 @@ import { CONTACT_EMAIL, socialLinks } from "@/content/social";
 
 interface ContactProps {
   dict: Dictionary;
+  /** Preview mode (holo windows/overlay): no id so anchors stay unique. */
+  mini?: boolean;
 }
 
 /** Inline social icons keyed by SocialLink.icon (markup, not data). */
@@ -31,7 +33,7 @@ const SOCIAL_ICONS: Record<string, React.ReactElement> = {
   ),
 };
 
-export default function Contact({ dict }: ContactProps) {
+export default function Contact({ dict, mini }: ContactProps) {
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<number | undefined>(undefined);
 
@@ -68,44 +70,38 @@ export default function Contact({ dict }: ContactProps) {
   }
 
   return (
-    <section id="contact" className="py-24 md:py-32">
-      <div className="mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="bevel bg-line p-px"
-        >
-          <div className="bevel bg-surface px-6 py-16 text-center sm:px-12 md:py-20">
-            <p className="mb-3 font-display text-xs font-semibold uppercase tracking-[0.25em] text-violet-soft">
+    // Root is a div: the full-screen snap <section> (shared with the footer)
+    // lives in app/page.tsx.
+    <div id={mini ? undefined : "contact"} className="m-auto w-full max-w-4xl px-6 pb-10 pt-24">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+          <div className="rounded-3xl bg-surface px-6 py-12 text-center ring-1 ring-white/10 sm:px-12 md:py-16">
+            <p className="mb-3 font-display text-xs font-semibold uppercase tracking-[0.25em] text-copper-soft">
               {t(dict, "contact.kicker")}
             </p>
-            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-night sm:text-4xl">
               {t(dict, "contact.title")}
             </h2>
-            <p className="mt-4 text-muted">{t(dict, "contact.sub")}</p>
+            <p className="mt-4 text-night/60">{t(dict, "contact.sub")}</p>
 
             {/* Primary action block — structured so a <form> can replace it later
                 without touching the surrounding section. */}
-            <div className="mt-10 flex flex-col items-center gap-6">
+            <div className="mt-8 flex flex-col items-center gap-5">
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-                <span className="select-all break-all font-display text-xl font-semibold text-fg sm:text-2xl">
+                <span className="select-all break-all font-display text-xl font-semibold text-night sm:text-2xl">
                   {CONTACT_EMAIL}
                 </span>
                 <button
                   type="button"
                   onClick={copyEmail}
                   aria-label={t(dict, "contact.copyAria")}
-                  className="group relative inline-block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
+                  className="liquid-glass-dark cursor-pointer rounded-full px-5 py-2.5 font-display text-xs font-bold tracking-wide text-night focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-copper-soft"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="bevel-sm absolute inset-0 bg-gradient-to-r from-violet-soft to-cyan transition-opacity group-hover:opacity-85"
-                  />
-                  <span className="relative z-10 block px-5 py-2.5 font-display text-xs font-bold tracking-wide text-night">
-                    {copied ? t(dict, "contact.copied") : t(dict, "contact.copy")}
-                  </span>
+                  {copied ? t(dict, "contact.copied") : t(dict, "contact.copy")}
                 </button>
               </div>
 
@@ -116,14 +112,14 @@ export default function Contact({ dict }: ContactProps) {
 
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="text-sm text-violet-soft underline-offset-4 transition-colors hover:text-cyan hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
+                className="text-sm text-night/70 underline-offset-4 transition-colors hover:text-copper-soft hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-copper-soft"
               >
                 {t(dict, "contact.mailto")}
               </a>
             </div>
 
-            <div className="mt-12 border-t border-line pt-8">
-              <p className="mb-4 text-xs uppercase tracking-wider text-muted">
+            <div className="mt-10 border-t border-white/10 pt-6">
+              <p className="mb-4 text-xs uppercase tracking-wider text-night/50">
                 {t(dict, "contact.social")}
               </p>
               <ul className="flex items-center justify-center gap-4">
@@ -134,7 +130,7 @@ export default function Contact({ dict }: ContactProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={link.label}
-                      className="flex h-11 w-11 items-center justify-center border border-line text-muted transition-colors hover:border-violet hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
+                      className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-full text-night/70 transition-colors hover:text-copper-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-soft"
                     >
                       {SOCIAL_ICONS[link.icon]}
                     </a>
@@ -143,8 +139,7 @@ export default function Contact({ dict }: ContactProps) {
               </ul>
             </div>
           </div>
-        </motion.div>
-      </div>
-    </section>
+      </motion.div>
+    </div>
   );
 }

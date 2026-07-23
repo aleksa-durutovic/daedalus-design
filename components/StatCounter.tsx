@@ -35,14 +35,12 @@ export default function StatCounter({ value, label, suffix = "" }: StatCounterPr
   }, [inView, reducedMotion, value, count]);
 
   return (
-    <div className="bevel-sm bg-line p-px">
-      <div className="bevel-sm flex h-full flex-col gap-1 bg-surface px-6 py-5">
-        <span ref={ref} className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
-          <motion.span className="text-gradient">{rounded}</motion.span>
-          <span className="text-gradient">{suffix}</span>
-        </span>
-        <span className="text-sm text-muted">{label}</span>
-      </div>
+    <div className="flex h-full flex-col gap-1 rounded-2xl bg-surface px-6 py-5 ring-1 ring-white/10">
+      <span ref={ref} className="font-display text-4xl font-bold tracking-tight text-night sm:text-5xl">
+        <motion.span>{rounded}</motion.span>
+        <span className="text-copper-soft">{suffix}</span>
+      </span>
+      <span className="text-sm text-night/60">{label}</span>
     </div>
   );
 }

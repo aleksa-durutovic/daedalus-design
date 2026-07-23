@@ -21,7 +21,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const dict = dictionaries[locale];
 
   return (
-    <html lang={locale}>
+    // snap-y snap-mandatory: the document is the snap container — each
+    // full-viewport section "changes windows" instead of free-scrolling.
+    <html lang={locale} className="snap-y snap-mandatory">
       <head>
         <link
           rel="preload"
@@ -41,7 +43,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       <body id="top" className="bg-night font-sans text-fg antialiased">
         <a
           href="#content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-violet focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
         >
           {t(dict, "skip")}
         </a>

@@ -36,7 +36,7 @@ export default function LanguageToggle({ dict, locale }: LanguageToggleProps) {
   }
 
   return (
-    <div className="flex items-center border border-line bg-surface p-0.5">
+    <div className="flex items-center rounded-full border border-fg/10 bg-fg/5 p-1 text-xs font-semibold">
       {OPTIONS.map((option) => (
         <button
           key={option}
@@ -45,9 +45,9 @@ export default function LanguageToggle({ dict, locale }: LanguageToggleProps) {
           disabled={pending}
           aria-pressed={locale === option}
           aria-label={t(dict, `toggle.label.${option}`)}
-          className={`px-2.5 py-1 font-display text-xs font-semibold tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan ${
+          className={`rounded-full px-2.5 py-1 font-display text-xs font-semibold tracking-wide transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan ${
             locale === option
-              ? "bg-violet-soft text-night"
+              ? "bg-fg text-night shadow-sm"
               : "text-muted hover:text-fg"
           } ${pending ? "opacity-60" : ""}`}
         >

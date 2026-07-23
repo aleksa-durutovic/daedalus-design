@@ -1,6 +1,6 @@
-# Beverly Design
+# Daedalus Design
 
-Marketing website for **Beverly Design** — a studio that designs and builds websites.
+Marketing website for **Daedalus Design** — a studio that designs and builds websites.
 Bilingual (Serbian default / English), dark, single-page, fully offline-capable.
 
 ## Stack
