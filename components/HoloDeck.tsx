@@ -128,19 +128,87 @@ function renderSection(key: PanelKey, dict: Dictionary) {
   }
 }
 
-/** Live scaled-down render of a real section (inert: display only). */
-function LivePreview({ panel, dict, width }: { panel: PanelBase; dict: Dictionary; width: number }) {
-  const scale = width / VW;
+/**
+ * GatePoster — a cheap static stand-in for the section behind a gate.
+ *
+ * The gates used to mount four COMPLETE live section trees, each scaled to
+ * fit the window. At gate width that scale is 0.10–0.19, so a 16px heading
+ * lands under 3px tall: the content was already illegible and read as
+ * coloured blocks. Producing those blocks cost ~1,200 DOM nodes, four sets
+ * of running Framer loops (Portfolio alone ran all four playable demos) and
+ * a re-layout of every one of them on each parallax frame.
+ *
+ * These posters draw the same block rhythm in ~15 nodes each. The real,
+ * fully live section is one click away in the overlay.
+ */
+const BAR = "rounded-full bg-fg/25";
+const CARD = "rounded bg-surface ring-1 ring-white/10";
+
+function GatePoster({ panel, width }: { panel: PanelBase; width: number }) {
+  const height = Math.round((width * VH) / VW);
   return (
     <div
       aria-hidden="true"
-      inert
-      className="pointer-events-none select-none overflow-hidden"
-      style={{ width, height: Math.round(VH * scale) }}
+      className="relative select-none overflow-hidden bg-abyss"
+      style={{ width, height }}
     >
-      <div style={{ width: VW, height: VH, transform: `scale(${scale})`, transformOrigin: "top left" }}>
-        {renderSection(panel.key, dict)}
+      {/* section kicker + title, common to every layout */}
+      <div className="absolute inset-x-[7%] top-[9%]">
+        <div className="h-[3%] w-[22%] rounded-full bg-copper" style={{ minHeight: 2 }} />
+        <div className={`mt-[6%] h-[6%] w-[62%] ${BAR}`} style={{ minHeight: 3 }} />
       </div>
+
+      {panel.key === "services" && (
+        <div className="absolute inset-x-[7%] bottom-[10%] grid grid-cols-2 gap-[3%]" style={{ height: "52%" }}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={`flex flex-col justify-end p-[6%] ${CARD}`}>
+              <span className="mb-[8%] block h-[14%] w-[22%] rounded-sm bg-copper" style={{ minHeight: 2 }} />
+              <span className={`block h-[10%] w-[70%] ${BAR}`} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {panel.key === "portfolio" && (
+        <div className="absolute inset-x-[7%] bottom-[10%] grid grid-cols-2 gap-[3%]" style={{ height: "58%" }}>
+          {["#c08552", "#232833", "#d9c4a8", "#3f5c5a"].map((c, i) => (
+            <div key={i} className={`overflow-hidden p-[4%] ${CARD}`}>
+              <span className="block h-[72%] w-full rounded-sm" style={{ background: c }} />
+              <span className={`mt-[8%] block h-[10%] w-[64%] ${BAR}`} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {panel.key === "about" && (
+        <div className="absolute inset-x-[7%] bottom-[12%]" style={{ height: "54%" }}>
+          <div className="space-y-[4%]">
+            {[92, 84, 70].map((w) => (
+              <div key={w} className={`h-[7%] ${BAR}`} style={{ width: `${w}%`, minHeight: 2 }} />
+            ))}
+          </div>
+          <div className="mt-[12%] grid grid-cols-4 gap-[4%]">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i}>
+                <span className="block h-[3px] w-[80%] rounded-full bg-copper" />
+                <span className={`mt-[30%] block h-[2px] w-full ${BAR}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {panel.key === "contact" && (
+        <div className="absolute inset-x-[16%] bottom-[16%] flex flex-col items-center">
+          <div className="h-[10px] w-[72%] rounded-full bg-surface ring-1 ring-white/10" />
+          <div className="mt-[8%] h-[7px] w-[42%] rounded-full bg-copper" />
+          <div className="mt-[10%] flex gap-[6%]">
+            {[0, 1, 2].map((i) => (
+              <span key={i} className="h-[5px] w-[5px] rounded-full bg-fg/30" />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -294,7 +362,7 @@ function HoloPanel({
             <div className="relative overflow-hidden rounded-lg ring-1 ring-[rgba(226,173,122,0.22)]">
               {/* Preview animations stay frozen until the gate is hovered */}
               <MotionConfig reducedMotion={hovered && !reduce ? "user" : "always"}>
-                <LivePreview panel={panel} dict={dict} width={previewW} />
+                <GatePoster panel={panel} width={previewW} />
               </MotionConfig>
               <div
                 aria-hidden="true"

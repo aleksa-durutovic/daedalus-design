@@ -136,23 +136,29 @@ body {
 /* ==========================================================================
    Liquid glass (Apple-style translucent surfaces) — DARK variants.
    Smoked navy glass with a faint steel rim light; sits over the labyrinth.
-   All rely on backdrop-filter — the gradient bg keeps them legible where
-   backdrop-filter is unsupported.
+
+   BUDGET: backdrop-filter is the most expensive property here — every use
+   forces its own compositing layer and re-blurs the backdrop each frame,
+   which is what made the gate morph drop frames. It is therefore spent ONLY
+   where the surface travels over changing content: the nav pill, and the
+   dialog scrim. Everything else sits over a near-flat dark field, where a
+   slightly more opaque gradient is visually indistinguishable and free.
    ========================================================================== */
 
 @utility liquid-glass {
   background: linear-gradient(
     135deg,
-    rgba(27, 31, 39, 0.82),
-    rgba(16, 20, 27, 0.6)
+    rgba(27, 31, 39, 0.92),
+    rgba(16, 20, 27, 0.78)
   );
-  backdrop-filter: blur(20px) saturate(1.4);
   border: 1px solid rgba(174, 182, 194, 0.22);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(236, 233, 225, 0.12);
 }
 
+/* KEEPS its blur: the nav rides over every section as you scroll, so it is
+   the one surface with genuinely varied content behind it. */
 @utility liquid-glass-pill {
   background: linear-gradient(
     135deg,
@@ -169,10 +175,9 @@ body {
 @utility liquid-glass-button {
   background: linear-gradient(
     135deg,
-    rgba(38, 44, 55, 0.92),
-    rgba(22, 27, 36, 0.78)
+    rgba(38, 44, 55, 0.97),
+    rgba(22, 27, 36, 0.9)
   );
-  backdrop-filter: blur(16px) saturate(1.4);
   border: 1px solid rgba(174, 182, 194, 0.28);
   box-shadow:
     0 6px 24px rgba(0, 0, 0, 0.5),
@@ -198,10 +203,9 @@ body {
 @utility liquid-glass-dark {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.14),
-    rgba(255, 255, 255, 0.06)
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.08)
   );
-  backdrop-filter: blur(16px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition:
@@ -298,15 +302,20 @@ body {
 
 /* Gate windows — smoked navy glass rimmed in copper, lit from the maze
    floor below (bone highlight on top). No more sci-fi cyan: the windows
-   belong to the same copper/bone world as the labyrinth. */
+   belong to the same copper/bone world as the labyrinth.
+
+   No backdrop-filter: four of these sit in the hero over the maze — thin
+   light lines on near-black — where an 8px blur is imperceptible but costs
+   four extra compositing layers that re-blur on every parallax frame. The
+   dialog that reuses this class gets its separation from the scrim's own
+   blur instead. */
 .holo-glass {
   background: linear-gradient(
     165deg,
-    rgba(27, 31, 39, 0.78),
-    rgba(16, 20, 27, 0.55) 55%,
-    rgba(192, 133, 82, 0.12)
+    rgba(27, 31, 39, 0.9),
+    rgba(16, 20, 27, 0.76) 55%,
+    rgba(192, 133, 82, 0.14)
   );
-  backdrop-filter: blur(8px) saturate(1.2);
   border: 1px solid rgba(226, 173, 122, 0.38);
   box-shadow:
     0 14px 44px rgba(4, 6, 10, 0.5),
