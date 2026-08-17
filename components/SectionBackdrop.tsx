@@ -3,14 +3,15 @@
 import { motion } from "framer-motion";
 
 /**
- * Decorative backdrop shared by every non-hero section. Ties the flat
- * content sections to the hero artwork with a drafting-grid + copper-glow
- * base and a per-section line motif (reticle / rings / contours) that draws
- * itself in on scroll. Purely decorative: aria-hidden, pointer-events-none,
- * and all motion is CSS/Framer gated on prefers-reduced-motion.
+ * Decorative backdrop shared by every non-hero section. A deep parchment
+ * wash + tiled labyrinth-wall field, crowned by a large circular labyrinth
+ * (concentric broken rings + radial gate walls — the logo's maze, enlarged)
+ * that draws itself in on scroll. Purely decorative: aria-hidden,
+ * pointer-events-none, and all motion is CSS/Framer gated on
+ * prefers-reduced-motion.
  */
 
-type Variant = "reticle" | "rings" | "contours";
+type Variant = "corner" | "rings" | "arcs";
 
 interface SectionBackdropProps {
   variant: Variant;
@@ -18,8 +19,9 @@ interface SectionBackdropProps {
   subtle?: boolean;
 }
 
-const NAVY = "#232833";
+const STEEL = "#aeb6c2";
 const COPPER = "#c08552";
+const EDGE = "#04060a"; // wall under-edge (extrusion shadow)
 
 // Deterministic particle field (no Math.random → no hydration mismatch).
 const PARTICLES = [
@@ -42,123 +44,126 @@ const draw = {
     pathLength: 1,
     opacity: 1,
     transition: {
-      pathLength: { duration: 1.5, ease: "easeInOut" as const, delay: 0.2 + i * 0.12 },
-      opacity: { duration: 0.4, delay: 0.2 + i * 0.12 },
+      pathLength: { duration: 1.4, ease: "easeInOut" as const, delay: 0.15 + i * 0.09 },
+      opacity: { duration: 0.4, delay: 0.15 + i * 0.09 },
     },
   }),
 };
 
 const viewport = { once: true, margin: "-12%" } as const;
 
-// Precomputed radial spokes for the Rings motif. Rounding to whole numbers
-// keeps server and client markup byte-identical (raw Math.cos/sin floats
-// differ in their last digit across environments → hydration mismatch).
-const RING_SPOKES = [0, 60, 120, 180, 240, 300].map((deg) => {
-  const rad = (deg * Math.PI) / 180;
-  return {
-    x1: Math.round(250 + 60 * Math.cos(rad)),
-    y1: Math.round(250 + 60 * Math.sin(rad)),
-    x2: Math.round(250 + 250 * Math.cos(rad)),
-    y2: Math.round(250 + 250 * Math.sin(rad)),
-  };
-});
+/* ------------------------------------------------------------------------
+   Circular labyrinth geometry — precomputed at module scope with rounded
+   coordinates so server and client markup stay byte-identical.
+   ------------------------------------------------------------------------ */
 
-/** Services — an aiming reticle / target, top-right. */
-function Reticle() {
-  return (
-    <motion.svg
-      className="absolute -right-20 -top-16 h-[32rem] w-[32rem] max-w-[70vw]"
-      viewBox="0 0 400 400"
-      fill="none"
-      initial="hidden"
-      whileInView="show"
-      viewport={viewport}
-    >
-      <motion.circle cx="200" cy="200" r="58" stroke={COPPER} strokeWidth="1.4" variants={draw} custom={0} />
-      <motion.circle cx="200" cy="200" r="112" stroke={NAVY} strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 7" variants={draw} custom={1} />
-      <motion.circle cx="200" cy="200" r="168" stroke={COPPER} strokeOpacity="0.55" strokeWidth="1" variants={draw} custom={2} />
-      <motion.line x1="200" y1="12" x2="200" y2="388" stroke={NAVY} strokeOpacity="0.35" strokeWidth="1" variants={draw} custom={1.4} />
-      <motion.line x1="12" y1="200" x2="388" y2="200" stroke={NAVY} strokeOpacity="0.35" strokeWidth="1" variants={draw} custom={1.7} />
-      <motion.path d="M200 150 L200 250 M150 200 L250 200" stroke={COPPER} strokeWidth="1.4" variants={draw} custom={2.4} />
-    </motion.svg>
-  );
+const C = 260; // center of a 520×520 viewBox
+
+function pt(r: number, deg: number): [string, string] {
+  const rad = (deg * Math.PI) / 180;
+  return [(C + r * Math.cos(rad)).toFixed(2), (C + r * Math.sin(rad)).toFixed(2)];
 }
 
-/** Portfolio — big offset labyrinth rings, bottom-left. */
-function Rings() {
+/** Arc segment of a ring between two angles (degrees, clockwise). */
+function arc(r: number, a0: number, a1: number): string {
+  const [x0, y0] = pt(r, a0);
+  const [x1, y1] = pt(r, a1);
+  const large = a1 - a0 > 180 ? 1 : 0;
+  return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+}
+
+/** Radial wall bridging two adjacent rings at a given angle. */
+function spoke(r0: number, r1: number, deg: number): string {
+  const [x0, y0] = pt(r0, deg);
+  const [x1, y1] = pt(r1, deg);
+  return `M ${x0} ${y0} L ${x1} ${y1}`;
+}
+
+// Hand-tuned wall layout: each ring is broken by gates (the gaps between
+// arc segments) and rings are tied together by radial walls — a maze, not
+// a target. Angles chosen so gates never align radially.
+const RING_ARCS: { r: number; segs: [number, number][] }[] = [
+  { r: 44, segs: [[20, 330]] },
+  { r: 82, segs: [[60, 175], [200, 350]] },
+  { r: 120, segs: [[-40, 40], [75, 200], [230, 300]] },
+  { r: 158, segs: [[10, 130], [160, 250], [280, 340]] },
+  { r: 196, segs: [[-70, 30], [60, 150], [185, 265]] },
+  { r: 234, segs: [[35, 120], [150, 240], [270, 355]] },
+];
+
+const SPOKE_WALLS: [number, number, number][] = [
+  [44, 82, 40],
+  [82, 120, 215],
+  [120, 158, 55],
+  [158, 196, 300],
+  [196, 234, 130],
+  [82, 120, 350],
+  [158, 196, 170],
+];
+
+const MAZE_PATHS: { d: string; copper: boolean }[] = [
+  ...RING_ARCS.flatMap((ring, i) =>
+    ring.segs.map((s) => ({ d: arc(ring.r, s[0], s[1]), copper: i % 2 === 1 }))
+  ),
+  ...SPOKE_WALLS.map(([r0, r1, deg]) => ({ d: spoke(r0, r1, deg), copper: false })),
+];
+
+/** Per-section placement of the big labyrinth (size / corner / rotation). */
+const PLACEMENTS: Record<Variant, { className: string; rotate: number }> = {
+  corner: { className: "absolute -right-24 -top-24 h-[36rem] w-[36rem] max-w-[75vw]", rotate: 15 },
+  rings: { className: "absolute -bottom-52 -left-52 h-[50rem] w-[50rem] max-w-[95vw]", rotate: 0 },
+  arcs: { className: "absolute -right-32 bottom-[-8rem] h-[42rem] w-[42rem] max-w-[85vw]", rotate: -30 },
+};
+
+/** The circular labyrinth motif — extruded steel walls, copper rings between
+    (the hero maze's little sibling: same 3D language, less detail). */
+function Labyrinth({ variant }: { variant: Variant }) {
+  const { className, rotate } = PLACEMENTS[variant];
   return (
     <motion.svg
-      className="absolute -bottom-48 -left-48 h-[46rem] w-[46rem] max-w-[90vw]"
-      viewBox="0 0 500 500"
+      className={className}
+      viewBox="0 0 520 520"
       fill="none"
+      style={{ rotate }}
       initial="hidden"
       whileInView="show"
       viewport={viewport}
     >
-      {[60, 110, 160, 210, 250].map((r, i) => (
-        <motion.circle
-          key={r}
-          cx="250"
-          cy="250"
-          r={r}
-          stroke={i % 2 ? NAVY : COPPER}
-          strokeOpacity={i % 2 ? 0.4 : 0.6}
-          strokeWidth="1.3"
-          strokeDasharray={`${Math.round(r * 1.5)} ${Math.round(r * 0.55)}`}
+      {/* Wall under-edges — the dark drop that lifts walls off the floor. */}
+      <motion.g
+        variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 1.2, delay: 0.5 } } }}
+      >
+        {MAZE_PATHS.map((p, i) => (
+          <path
+            key={`s${i}`}
+            d={p.d}
+            stroke={EDGE}
+            strokeOpacity="0.55"
+            strokeWidth={p.copper ? 3.6 : 3.3}
+            strokeLinecap="round"
+            transform="translate(0 3)"
+          />
+        ))}
+      </motion.g>
+      {/* Copper heart of the maze — the logo's "D" position. */}
+      <circle cx={C} cy={C} r="7" fill={COPPER} opacity="0.85" />
+      {MAZE_PATHS.map((p, i) => (
+        <motion.path
+          key={i}
+          d={p.d}
+          stroke={p.copper ? COPPER : STEEL}
+          strokeOpacity={p.copper ? 0.6 : 0.42}
+          strokeWidth={p.copper ? 2.6 : 2.3}
           strokeLinecap="round"
           variants={draw}
-          custom={i}
-        />
-      ))}
-      {RING_SPOKES.map((s, i) => (
-        <motion.line
-          key={i}
-          x1={s.x1}
-          y1={s.y1}
-          x2={s.x2}
-          y2={s.y2}
-          stroke={NAVY}
-          strokeOpacity="0.14"
-          strokeWidth="1"
-          variants={draw}
-          custom={2 + i * 0.2}
+          custom={i * 0.5}
         />
       ))}
     </motion.svg>
   );
 }
 
-/** About — topographic contour lines, echoing the wireframe hero. */
-function Contours() {
-  return (
-    <motion.svg
-      className="absolute -right-24 bottom-[-6rem] h-[38rem] w-[38rem] max-w-[80vw]"
-      viewBox="0 0 500 500"
-      fill="none"
-      initial="hidden"
-      whileInView="show"
-      viewport={viewport}
-    >
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <motion.ellipse
-          key={i}
-          cx="250"
-          cy="250"
-          rx={70 + i * 36}
-          ry={44 + i * 27}
-          transform="rotate(-20 250 250)"
-          stroke={i % 2 ? COPPER : NAVY}
-          strokeOpacity={i % 2 ? 0.5 : 0.28}
-          strokeWidth="1.2"
-          variants={draw}
-          custom={i}
-        />
-      ))}
-    </motion.svg>
-  );
-}
-
-/** Drafting registration mark in a corner. `corner` rotates the L + dot. */
+/** Drafting registration mark in a corner. `rotate` turns the L + dot. */
 function CornerMark({ className, rotate }: { className: string; rotate: number }) {
   return (
     <motion.svg
@@ -179,18 +184,18 @@ function CornerMark({ className, rotate }: { className: string; rotate: number }
 export default function SectionBackdrop({ variant, subtle }: SectionBackdropProps) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Base wash + drafting grid */}
-      <div className="paper-wash absolute inset-0" />
-      <div className={`blueprint-grid decor-drift absolute inset-0 ${subtle ? "opacity-40" : "opacity-90"}`} />
+      {/* Dark maze atmosphere + tiled labyrinth-wall field */}
+      <div className="abyss-wash absolute inset-0" />
+      <div className={`maze-walls decor-drift absolute inset-0 ${subtle ? "opacity-50" : "opacity-100"}`} />
 
-      {/* Breathing copper glow */}
+      {/* Breathing glows — warm copper above, cold steel below */}
       <div
         className="decor-breathe absolute -right-40 -top-40 h-[42rem] w-[42rem] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(192,133,82,0.18), transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, rgba(192,133,82,0.17), transparent 70%)" }}
       />
       <div
         className="decor-breathe absolute -bottom-48 -left-32 h-[36rem] w-[36rem] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(35,40,51,0.10), transparent 70%)", animationDelay: "3s" }}
+        style={{ background: "radial-gradient(circle, rgba(174,182,194,0.09), transparent 70%)", animationDelay: "3s" }}
       />
 
       {/* Corner registration marks — cleared below the floating navbar */}
@@ -199,11 +204,9 @@ export default function SectionBackdrop({ variant, subtle }: SectionBackdropProp
       <CornerMark className="right-6 bottom-8" rotate={180} />
       <CornerMark className="left-6 bottom-8" rotate={270} />
 
-      {/* Signature line motif */}
+      {/* Signature motif — the logo's labyrinth, drawn wall by wall */}
       <div className={subtle ? "opacity-60" : "opacity-100"}>
-        {variant === "reticle" && <Reticle />}
-        {variant === "rings" && <Rings />}
-        {variant === "contours" && <Contours />}
+        <Labyrinth variant={variant} />
       </div>
 
       {/* Drifting dust particles */}
@@ -216,8 +219,8 @@ export default function SectionBackdrop({ variant, subtle }: SectionBackdropProp
             top: p.y,
             width: p.s,
             height: p.s,
-            background: i % 3 === 0 ? COPPER : NAVY,
-            opacity: 0.3,
+            background: i % 3 === 0 ? COPPER : STEEL,
+            opacity: 0.35,
             animationDuration: `${p.d}s`,
             animationDelay: `${p.delay}s`,
           }}

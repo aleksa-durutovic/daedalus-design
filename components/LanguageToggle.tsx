@@ -47,7 +47,7 @@ export default function LanguageToggle({ dict, locale }: LanguageToggleProps) {
           aria-label={t(dict, `toggle.label.${option}`)}
           className={`rounded-full px-2.5 py-1 font-display text-xs font-semibold tracking-wide transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan ${
             locale === option
-              ? "bg-fg text-night shadow-sm"
+              ? "bg-fg text-surface shadow-sm"
               : "text-muted hover:text-fg"
           } ${pending ? "opacity-60" : ""}`}
         >

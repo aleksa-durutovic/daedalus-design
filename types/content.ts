@@ -8,10 +8,21 @@ export interface ServiceItem {
   descKey: string;
 }
 
-export interface PortfolioItem {
+export type ShowcaseKey = 'shop' | 'booking' | 'company' | 'landing';
+
+export interface ShowcaseItem {
+  key: ShowcaseKey;
   titleKey: string;
-  variant: 'gradient' | 'svg';
-  tag: string;
+  descKey: string;
+  tagKey: string;
+  /** Who this kind of site is for — shown at the top of the open window. */
+  forKey: string;
+  /** Four concrete things the client gets (i18n keys). */
+  featureKeys: [string, string, string, string];
+  /** Three process steps, each "Title — detail" (i18n keys). */
+  stepKeys: [string, string, string];
+  /** Typical delivery window. */
+  timelineKey: string;
 }
 
 export interface SocialLink {

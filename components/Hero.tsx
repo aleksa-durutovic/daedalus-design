@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { Dictionary } from "@/types/content";
 import { t } from "@/content/i18n";
 import HoloDeck from "@/components/HoloDeck";
+import MazeScene from "@/components/MazeScene";
 
 interface HeroProps {
   dict: Dictionary;
@@ -22,25 +23,16 @@ const item = {
 export default function Hero({ dict }: HeroProps) {
   return (
     <section className="relative h-svh snap-start snap-always overflow-hidden">
-      {/* Full-bleed clean artwork (16:9, upscaled 2x) — the figure at the table */}
-      <motion.img
-        src="/hero-table.jpg"
-        srcSet="/hero-table-1x.jpg 1365w, /hero-table.jpg 2730w"
-        sizes="100vw"
-        alt={`Daedalus Design — ${t(dict, "hero.eyebrow")}`}
-        className="absolute inset-0 h-full w-full object-cover"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.1, ease: "easeOut" }}
-      />
+      {/* The labyrinth itself — a 3D maze vortex, not a printed pattern */}
+      <MazeScene />
 
-      {/* Paper fade for copy legibility over the floor */}
+      {/* Dark fade for copy legibility over the maze floor */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-night via-night/40 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-abyss via-abyss/45 to-transparent"
       />
 
-      {/* Hologram windows he "controls" — live previews of the site */}
+      {/* Hologram windows projected out of the maze — live previews of the site */}
       <HoloDeck dict={dict} />
 
       {/* Compact copy, bottom-left */}
@@ -82,7 +74,7 @@ export default function Hero({ dict }: HeroProps) {
                 stroke="currentColor"
                 strokeWidth="2"
                 aria-hidden="true"
-                className="h-4 w-4 text-copper transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                className="h-4 w-4 text-copper transition-transform duration-300 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M9 7h8v8" />
               </svg>

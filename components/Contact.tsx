@@ -119,7 +119,7 @@ export default function Contact({ dict, mini }: ContactProps) {
             </div>
 
             <div className="mt-10 border-t border-white/10 pt-6">
-              <p className="mb-4 text-xs uppercase tracking-wider text-night/50">
+              <p className="mb-4 text-xs uppercase tracking-wider text-night/75">
                 {t(dict, "contact.social")}
               </p>
               <ul className="flex items-center justify-center gap-4">

@@ -1,15 +1,17 @@
 {
   "color": {
-    "background": "#ECE9E1",
+    "background": "#10141B",
     "surface": "#1B1F27",
-    "line": "#D9D4C9",
-    "text": "#232833",
-    "muted": "#7D7A70",
+    "line": "#2A3140",
+    "text": "#E8E6DF",
+    "muted": "#A39E91",
     "accent": "#C08552",
-    "accentDeep": "#96602F",
-    "accentSoft": "#E2AD7A"
+    "accentDeep": "#D08B4E",
+    "accentSoft": "#E2AD7A",
+    "steel": "#AEB6C2",
+    "paper": "#ECE9E1"
   },
-  "_color_note": "Daedalus Design palette taken from the logo + landing artwork: warm paper background, deep navy-charcoal panels (the logo's navy), navy ink text, and the logo's brushed copper as the single chromatic accent (deep variant is AA-safe for small text on paper; soft variant is for text on dark panels).",
+  "_color_note": "Daedalus Design DARK LABYRINTH palette (reference: 3D circular-maze artwork): near-black navy abyss, extruded steel maze walls, light warm ink, the logo's brushed copper as the chromatic accent, holo-teal (#6FD3CF) for focus rings and beams. Paper survives as light text on panels and as the 'paper' demo tiles. All text tokens AA-checked (>=4.5:1) on abyss and surface.",
   "type": {
     "display": "Sora, ui-sans-serif, system-ui, sans-serif",
     "body": "Inter, ui-sans-serif, system-ui, sans-serif",
@@ -22,6 +24,6 @@
     "spacing_scale": [4, 8, 12, 16, 24, 32, 48, 64, 96, 128]
   },
   "voice": "Confident and concise. No hype, no exclamation points. Serbian first, English second.",
-  "signature_element": "Liquid-glass surfaces (Apple-style translucent blur) on the floating pill navbar, buttons and card chrome, with the logo's copper as hover/accent color. Rounded-full pills and rounded-2xl cards throughout.",
+  "signature_element": "The labyrinth: a generated 3D circular maze (extruded walls, parallax bands, copper core) fills the landing page; every later section carries the same maze in a quieter register (tiled wall field + one extruded circular motif). Smoked-navy liquid glass on the navbar/buttons; copper as hover/accent; rounded-full pills and rounded-2xl cards.",
   "css_architecture": "utility-first"
 }

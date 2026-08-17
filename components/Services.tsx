@@ -47,7 +47,7 @@ export default function Services({ dict, mini }: ServicesProps) {
           : "relative h-svh snap-start snap-always overflow-hidden"
       }
     >
-      {!mini && <SectionBackdrop variant="reticle" />}
+      {!mini && <SectionBackdrop variant="corner" />}
       {/* m-auto inside a scrollable flex column: centered when it fits,
           scrollable (not clipped) on screens too short for the content. */}
       <div className="relative z-10 flex h-full flex-col overflow-y-auto">
@@ -75,7 +75,7 @@ export default function Services({ dict, mini }: ServicesProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
-                className="group flex flex-col gap-4 rounded-2xl bg-surface p-6 ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-copper/50"
+                className="group flex flex-col gap-4 rounded-2xl bg-surface p-6 ring-1 ring-white/10 transition-all duration-300 hover:shadow-xl hover:ring-copper/50 motion-safe:hover:-translate-y-1"
               >
                 <span className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl text-copper-soft">
                   {ICONS[service.icon]}

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Dictionary, Locale } from "@/types/content";
 import { t } from "@/content/i18n";
+import { isOverlayOpen } from "@/lib/overlayState";
 import LanguageToggle from "@/components/LanguageToggle";
 
 interface NavProps {
@@ -36,15 +38,16 @@ const ICONS = {
   ),
 } as const;
 
-/** Maze emblem cropped out of the full logo lock-up (wordmark rendered as text). */
+/** Standalone maze emblem — a paper "coin" on the dark glass. */
 function LogoMark({ size = "h-10 w-10" }: { size?: string }) {
   return (
-    <span className={`${size} block shrink-0 overflow-hidden rounded-full`}>
-      <img
-        src="/logo.png"
+    <span className={`${size} block shrink-0 overflow-hidden rounded-full ring-1 ring-white/15`}>
+      <Image
+        src="/logo-mark.png"
         alt=""
-        className="h-full w-full object-cover mix-blend-multiply"
-        style={{ transform: "scale(1.65)", transformOrigin: "50% 38%" }}
+        width={40}
+        height={40}
+        className="h-full w-full object-cover"
       />
     </span>
   );
@@ -59,6 +62,25 @@ export default function Nav({ dict, locale }: NavProps) {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Esc anywhere → back to the landing page (top of the maze). Overlays
+  // (holo morph, showcase dialog) register in overlayState while open, and
+  // Esc belongs to them first — otherwise closing a dialog would also
+  // scroll the visitor back to the hero.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (isOverlayOpen()) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      setMenuOpen(false);
+      // Instant, not smooth: mandatory scroll-snap sections swallow smooth
+      // programmatic scrolls (same reason HoloDeck lands sections instantly).
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   function handleNavClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
@@ -110,19 +132,19 @@ export default function Nav({ dict, locale }: NavProps) {
             ))}
           </ul>
 
-          {/* Actions: language toggle + liquid glass CTA */}
+          {/* Actions: liquid glass CTA + language toggle */}
           <div className="hidden items-center gap-3 sm:flex">
-            <LanguageToggle dict={dict} locale={locale} />
             <a
               href="#contact"
               onClick={(e) => handleNavClick(e, "#contact")}
               className="liquid-glass-button group flex cursor-pointer items-center gap-2 rounded-full px-5 py-2.5 font-display text-xs font-semibold tracking-wide text-fg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
             >
               <span>{t(dict, "hero.cta")}</span>
-              <span className="text-copper transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+              <span className="text-copper transition-transform duration-300 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5">
                 {ICONS.arrowUpRight}
               </span>
             </a>
+            <LanguageToggle dict={dict} locale={locale} />
           </div>
 
           {/* Mobile: hamburger */}

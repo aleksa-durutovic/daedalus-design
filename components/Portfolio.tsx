@@ -1,10 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
-import type { Dictionary } from "@/types/content";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import type { Dictionary, ShowcaseItem } from "@/types/content";
 import { t } from "@/content/i18n";
-import { portfolio } from "@/content/portfolio";
+import { showcase } from "@/content/portfolio";
+import { popOverlay, pushOverlay } from "@/lib/overlayState";
 import SectionBackdrop from "@/components/SectionBackdrop";
+import { Demo } from "@/components/showcase/demos";
+import ShowcaseDialog from "@/components/showcase/ShowcaseDialog";
 
 interface PortfolioProps {
   dict: Dictionary;
@@ -13,79 +17,51 @@ interface PortfolioProps {
 }
 
 /**
- * Placeholder art, one entry per project index (markup, not data).
- * Monochrome navy/gray palette so the tiles read as one family.
+ * Portfolio — the four kinds of site the studio builds. Each card previews
+ * a real, working demo of that kind of site; clicking one opens it into a
+ * dialog where the demo becomes playable and the written detail lives.
+ *
+ * In `mini` mode the whole section is rendered inside a hero gate window,
+ * where it must stay display-only — the cards do not open anything there
+ * (the gate itself is the click target).
  */
-const ART: React.ReactElement[] = [
-  // 0 — Aurora Studio: diagonal gray → navy
-  <div
-    key="art-0"
-    aria-hidden="true"
-    className="absolute inset-0"
-    style={{ background: "linear-gradient(135deg, #55524a 0%, #1b1f27 55%, #7d7a70 130%)" }}
-  />,
-  // 1 — Nordika Shop: diagonal stripes
-  <svg key="art-1" aria-hidden="true" className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
-    <defs>
-      <pattern id="stripes" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-        <rect width="28" height="28" fill="#1b1f27" />
-        <rect width="10" height="28" fill="#7d7a70" opacity="0.55" />
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#stripes)" />
-  </svg>,
-  // 2 — Pulse Analytics: conic sweep with a copper glint
-  <div
-    key="art-2"
-    aria-hidden="true"
-    className="absolute inset-0"
-    style={{ background: "conic-gradient(from 210deg at 70% 30%, #1b1f27, #7d7a70 40%, #e2ad7a 60%, #1b1f27 80%)" }}
-  />,
-  // 3 — Terra: deep radial gray → navy
-  <div
-    key="art-3"
-    aria-hidden="true"
-    className="absolute inset-0"
-    style={{ background: "radial-gradient(120% 120% at 20% 20%, #d9d4c9 0%, #55524a 45%, #1b1f27 100%)" }}
-  />,
-  // 4 — Forma Gym: dot matrix + copper circle
-  <svg key="art-4" aria-hidden="true" className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
-    <defs>
-      <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
-        <rect width="20" height="20" fill="#1b1f27" />
-        <circle cx="3" cy="3" r="1.6" fill="#d9d4c9" opacity="0.6" />
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#dots)" />
-    <circle cx="75%" cy="35%" r="70" fill="none" stroke="#c08552" strokeWidth="20" opacity="0.6" />
-  </svg>,
-  // 5 — Café Mono: concentric arcs
-  <svg key="art-5" aria-hidden="true" className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
-    <rect width="100%" height="100%" fill="#1b1f27" />
-    <g fill="none" strokeWidth="2.5">
-      <circle cx="25%" cy="110%" r="70" stroke="#e2ad7a" />
-      <circle cx="25%" cy="110%" r="105" stroke="#d9d4c9" opacity="0.8" />
-      <circle cx="25%" cy="110%" r="140" stroke="#7d7a70" opacity="0.6" />
-      <circle cx="25%" cy="110%" r="175" stroke="#7d7a70" opacity="0.4" />
-      <circle cx="25%" cy="110%" r="210" stroke="#55524a" opacity="0.25" />
-    </g>
-  </svg>,
-];
-
 export default function Portfolio({ dict, mini }: PortfolioProps) {
+  const [open, setOpen] = useState<ShowcaseItem | null>(null);
+
+  // Scroll lock + Esc claim live with the OPEN STATE, not with the dialog's
+  // mount: they must release the instant it is dismissed, even if the exit
+  // animation is slow, interrupted, or frozen (a hidden tab stops rAF).
+  useEffect(() => {
+    if (!open) return;
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    pushOverlay();
+    return () => {
+      html.style.overflow = prev;
+      popOverlay();
+    };
+  }, [open]);
+
+  function goToContact() {
+    setOpen(null);
+    // Let the dialog release the scroll lock before we move.
+    window.setTimeout(() => {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    }, 60);
+  }
+
   return (
     <section
       id={mini ? undefined : "portfolio"}
       className={
-        mini
-          ? "relative h-full overflow-hidden"
-          : "relative h-svh snap-start snap-always overflow-hidden"
+        mini ? "relative h-full overflow-hidden" : "relative h-svh snap-start snap-always overflow-hidden"
       }
     >
       {!mini && <SectionBackdrop variant="rings" />}
       <div className="relative z-10 flex h-full flex-col overflow-y-auto">
         {/* min-h-0 + flex-1 grid: tiles stretch to exactly fill the viewport */}
-        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-6 pb-10 pt-24">
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-6 pb-8 pt-24">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -101,30 +77,89 @@ export default function Portfolio({ dict, mini }: PortfolioProps) {
             <p className="mt-3 text-muted">{t(dict, "portfolio.sub")}</p>
           </motion.div>
 
-          <div className="mt-8 grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-3 lg:grid-cols-3 lg:grid-rows-2 lg:gap-4">
-            {portfolio.map((project, index) => (
-              <motion.article
-                key={project.titleKey}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: "easeOut" }}
-                className="group relative min-h-24 overflow-hidden rounded-2xl bg-surface ring-1 ring-white/10 transition-shadow duration-300 hover:shadow-xl"
-              >
-                {ART[index]}
-                <div className="liquid-glass-dark absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 rounded-none border-x-0 border-b-0 px-4 py-2.5">
-                  <h3 className="truncate font-display text-sm font-semibold text-night">
-                    {t(dict, project.titleKey)}
-                  </h3>
-                  <span className="hidden shrink-0 text-[10px] uppercase tracking-wider text-night/60 sm:block">
-                    {project.tag}
-                  </span>
-                </div>
-              </motion.article>
-            ))}
+          <div className="mt-6 grid min-h-0 flex-1 grid-cols-2 grid-rows-2 gap-3 lg:gap-4">
+            {showcase.map((item, index) => {
+              return (
+                <motion.article
+                  key={item.key}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{
+                    duration: 0.5,
+                    delay: (index % 2) * 0.08 + Math.floor(index / 2) * 0.12,
+                    ease: "easeOut",
+                  }}
+                  className="group flex min-h-28 flex-col overflow-hidden rounded-2xl bg-surface p-2.5 ring-1 ring-white/10 transition-all duration-300 hover:shadow-xl hover:ring-copper/50 focus-within:ring-copper"
+                >
+                  <div className="relative min-h-0 flex-1 overflow-hidden rounded-xl">
+                    <Demo demoKey={item.key} dict={dict} />
+                    {/* Click affordance — the whole tile is the hit area */}
+                    {!mini && (
+                      <button
+                        type="button"
+                        onClick={() => setOpen(item)}
+                        aria-label={`${t(dict, "portfolio.open")}: ${t(dict, item.titleKey)}`}
+                        className="absolute inset-0 z-10 flex cursor-pointer items-end justify-center bg-gradient-to-t from-abyss/80 via-transparent to-transparent pb-3 opacity-0 transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper"
+                      >
+                        <span className="rounded-full bg-copper px-4 py-1.5 font-display text-xs font-bold text-abyss shadow-lg">
+                          {t(dict, "portfolio.open")} →
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                  <div className="px-1.5 pb-1 pt-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="truncate font-display text-sm font-semibold text-fg">
+                        {t(dict, item.titleKey)}
+                      </h3>
+                      <span className="shrink-0 rounded-full border border-copper-soft/40 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-copper-soft">
+                        {t(dict, item.tagKey)}
+                      </span>
+                    </div>
+                    <p className="mt-1 hidden text-xs leading-snug text-muted sm:line-clamp-2">
+                      {t(dict, item.descKey)}
+                    </p>
+                  </div>
+                </motion.article>
+              );
+            })}
           </div>
+
+          {/* The promise under the grid: the direction is the client's call. */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="mt-4 flex items-center gap-2 text-sm text-muted"
+          >
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0 text-copper">
+              <path
+                d="M8 1.5A6.5 6.5 0 1 1 1.5 8M8 4.25A3.75 3.75 0 1 1 4.25 8M8 7v2"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
+            {t(dict, "portfolio.note")}
+          </motion.p>
         </div>
       </div>
+
+      {!mini && (
+        <AnimatePresence>
+          {open && (
+            <ShowcaseDialog
+              key={open.key}
+              item={open}
+              dict={dict}
+              onClose={() => setOpen(null)}
+              onCta={goToContact}
+            />
+          )}
+        </AnimatePresence>
+      )}
     </section>
   );
 }

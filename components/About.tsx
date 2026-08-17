@@ -30,7 +30,7 @@ export default function About({ dict, mini }: AboutProps) {
           : "relative h-svh snap-start snap-always overflow-hidden"
       }
     >
-      {!mini && <SectionBackdrop variant="contours" />}
+      {!mini && <SectionBackdrop variant="arcs" />}
       <div className="relative z-10 flex h-full flex-col overflow-y-auto">
         <div className="m-auto grid w-full max-w-6xl items-center gap-10 px-6 pb-12 pt-24 lg:grid-cols-2 lg:gap-14">
           <motion.div

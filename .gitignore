@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# internal working notes — kept local, never published to the public repo
+DESIGN-CONTEXT.txt
+production-fixes.txt
+*.local.md

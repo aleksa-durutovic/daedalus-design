@@ -55,22 +55,29 @@
    ========================================================================== */
 
 @theme {
-  /* Daedalus Design palette (from the logo + landing artwork):
-     warm paper background, deep navy-charcoal panels (the logo's navy),
-     and the logo's copper as the single chromatic accent.
-     Legacy token NAMES (violet/cyan) are kept as aliases so untouched
-     utilities keep compiling — they now resolve to copper tones. */
-  --color-night: #ece9e1; /* paper — page bg + light text on dark panels */
-  --color-surface: #1b1f27; /* navy-charcoal — dark card panels */
-  --color-line: #d9d4c9; /* hairline rules on paper */
-  --color-fg: #232833; /* navy ink — body text on paper */
-  --color-muted: #7d7a70; /* warm gray — secondary text on paper */
+  /* Daedalus Design palette — the DARK LABYRINTH world (reference: the
+     3D circular maze artwork). Deep charcoal-navy space, steel maze walls,
+     the logo's copper as the chromatic accent, holo-teal for focus/beams.
+     All text tokens are AA-checked (≥4.5:1) against abyss AND surface.
+     Legacy token NAMES (night/violet/cyan) are kept as aliases so untouched
+     utilities keep compiling — values are retuned for the dark world. */
+  --color-abyss: #10141b; /* page background — the dark of the maze */
+  --color-night: #ece9e1; /* paper — light text on dark panels + paper demo tiles */
+  --color-surface: #1b1f27; /* navy-charcoal — card panels (elevated vs abyss) */
+  --color-line: #2a3140; /* hairline rules on dark */
+  --color-fg: #e8e6df; /* light ink — body text on dark */
+  --color-muted: #a39e91; /* warm gray — secondary text on dark (6.9:1) */
   --color-copper: #c08552; /* logo copper — accents, hover states */
-  --color-copper-deep: #96602f; /* AA-safe copper for small text on paper */
+  --color-copper-deep: #d08b4e; /* AA copper for small text on dark (6.6:1) */
   --color-copper-soft: #e2ad7a; /* light copper for text on dark panels */
+  /* Deep copper for use as INK ON LIGHT surfaces (paper/white demo panels).
+     copper/copper-deep are tuned for dark backgrounds and only reach ~2.8:1
+     on white — this one is 6.2:1 on white, 5.1:1 on paper. */
+  --color-copper-ink: #8a5320;
+  --color-steel: #aeb6c2; /* maze-wall steel (decorative strokes) */
   --color-violet: #c08552; /* legacy alias → copper */
-  --color-violet-soft: #96602f; /* legacy alias → deep copper */
-  --color-cyan: #96602f; /* legacy alias → deep copper (focus rings) */
+  --color-violet-soft: #d08b4e; /* legacy alias → deep copper */
+  --color-cyan: #6fd3cf; /* holo teal — focus rings (10.4:1 on abyss) */
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, Arial, sans-serif;
@@ -84,7 +91,7 @@
 html {
   /* No scroll-padding: sections are full-viewport snap targets and the nav
      floats over them, so snap/anchor alignment must be the true top. */
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 /* Smooth scroll only for users who allow motion (a11y rule #1) */
@@ -95,7 +102,7 @@ html {
 }
 
 body {
-  background: var(--color-night);
+  background: var(--color-abyss);
   color: var(--color-fg);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -103,7 +110,7 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-fg) 22%, transparent);
+  background: color-mix(in oklab, var(--color-copper) 40%, transparent);
   color: var(--color-fg);
 }
 
@@ -127,58 +134,64 @@ body {
 }
 
 /* ==========================================================================
-   Liquid glass (Apple-style translucent surfaces).
-   Light variants sit on the paper/artwork; the -dark variant sits on the
-   navy-charcoal panels. All rely on backdrop-filter — the gradient bg keeps
-   them legible where backdrop-filter is unsupported.
+   Liquid glass (Apple-style translucent surfaces) — DARK variants.
+   Smoked navy glass with a faint steel rim light; sits over the labyrinth.
+   All rely on backdrop-filter — the gradient bg keeps them legible where
+   backdrop-filter is unsupported.
    ========================================================================== */
 
 @utility liquid-glass {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.72),
-    rgba(255, 255, 255, 0.44)
+    rgba(27, 31, 39, 0.82),
+    rgba(16, 20, 27, 0.6)
   );
-  backdrop-filter: blur(20px) saturate(1.7);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(174, 182, 194, 0.22);
   box-shadow:
-    0 8px 32px rgba(35, 40, 51, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(236, 233, 225, 0.12);
 }
 
 @utility liquid-glass-pill {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0.22)
+    rgba(27, 31, 39, 0.6),
+    rgba(16, 20, 27, 0.35)
   );
-  backdrop-filter: blur(14px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid rgba(174, 182, 194, 0.16);
   box-shadow:
-    0 4px 20px rgba(35, 40, 51, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(236, 233, 225, 0.08);
 }
 
 @utility liquid-glass-button {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0.58)
+    rgba(38, 44, 55, 0.92),
+    rgba(22, 27, 36, 0.78)
   );
-  backdrop-filter: blur(16px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(174, 182, 194, 0.28);
   box-shadow:
-    0 6px 24px rgba(35, 40, 51, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    0 6px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(236, 233, 225, 0.14);
   transition:
     transform 0.3s ease,
-    box-shadow 0.3s ease;
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 
   &:hover {
-    transform: translateY(-1px);
+    /* The lift is the only motion here — colour/shadow feedback stays. */
+    @media (prefers-reduced-motion: no-preference) {
+      transform: translateY(-1px);
+    }
+    border-color: rgba(192, 133, 82, 0.55);
     box-shadow:
-      0 10px 30px rgba(35, 40, 51, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+      0 10px 30px rgba(0, 0, 0, 0.6),
+      0 0 18px rgba(192, 133, 82, 0.18),
+      inset 0 1px 0 rgba(236, 233, 225, 0.14);
   }
 }
 
@@ -228,22 +241,24 @@ body {
   50% { transform: translate(-2.4%, 2.4%); }
 }
 
-/* Fine 34px drafting grid with a heavier 170px major grid over it. */
-.blueprint-grid {
+/* Labyrinth wall field — a seamless 120px maze tile (steel walls with a
+   dark drop edge for depth, echoing the 3D maze reference). Edge crossings
+   sit on fixed lanes (y=15/75, x=45/105) so adjacent tiles join into
+   continuous walls. Two layers: dark "under-edge" offset 2px down, lit top. */
+.maze-walls {
   background-image:
-    linear-gradient(to right, rgba(35, 40, 51, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(35, 40, 51, 0.05) 1px, transparent 1px),
-    linear-gradient(to right, rgba(35, 40, 51, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(35, 40, 51, 0.08) 1px, transparent 1px);
-  background-size: 34px 34px, 34px 34px, 170px 170px, 170px 170px;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23aeb6c2' stroke-opacity='0.13' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M-5 15H55'/%3E%3Cpath d='M85 15H125'/%3E%3Cpath d='M-5 75H25'/%3E%3Cpath d='M55 75H95'/%3E%3Cpath d='M45 -5V35'/%3E%3Cpath d='M45 65V125'/%3E%3Cpath d='M105 -5V65'/%3E%3Cpath d='M105 95V125'/%3E%3Cpath d='M15 45H75V105H45'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23000000' stroke-opacity='0.35' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' transform='translate(0 2)'%3E%3Cpath d='M-5 15H55'/%3E%3Cpath d='M85 15H125'/%3E%3Cpath d='M-5 75H25'/%3E%3Cpath d='M55 75H95'/%3E%3Cpath d='M45 -5V35'/%3E%3Cpath d='M45 65V125'/%3E%3Cpath d='M105 -5V65'/%3E%3Cpath d='M105 95V125'/%3E%3Cpath d='M15 45H75V105H45'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 120px, 120px 120px;
 }
 
-/* Warm gradient wash so the base is never a single flat fill. */
-.paper-wash {
+/* Abyss wash — the dark maze atmosphere shared by every section: a faint
+   copper glow up top, cold steel from below, over near-black navy. */
+.abyss-wash {
   background:
-    radial-gradient(115% 75% at 88% -5%, rgba(192, 133, 82, 0.1), transparent 55%),
-    radial-gradient(95% 70% at -5% 105%, rgba(35, 40, 51, 0.05), transparent 60%),
-    linear-gradient(178deg, #efece5 0%, #e7e3d9 100%);
+    radial-gradient(115% 75% at 88% -5%, rgba(192, 133, 82, 0.14), transparent 55%),
+    radial-gradient(95% 70% at -5% 105%, rgba(174, 182, 194, 0.07), transparent 60%),
+    linear-gradient(178deg, #141821 0%, #0d1118 100%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -253,39 +268,58 @@ body {
 }
 
 /* ==========================================================================
+   Quiet mode — the site for visitors who ask for reduced motion.
+   The rule is "calm, not empty": colour, opacity and shadow feedback all
+   survive, so hovers and state changes still read; only travel, scaling and
+   looping animation are cut. Framer Motion drops transform/layout animation
+   on its own (MotionConfig reducedMotion="user" in app/page.tsx) — this
+   block covers the plain-CSS half.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* Kill looping/entrance keyframes without disabling one-shot fades. */
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* Keep transitions, but only on properties that do not move anything. */
+    transition-property: opacity, color, background-color, border-color,
+      box-shadow, fill, stroke, outline-color !important;
+    transition-duration: 200ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
    Holo deck — the hero's floating hologram windows (teal glass, matching
    the table screen in the artwork) and the light beams from the hands.
    ========================================================================== */
 
+/* Gate windows — smoked navy glass rimmed in copper, lit from the maze
+   floor below (bone highlight on top). No more sci-fi cyan: the windows
+   belong to the same copper/bone world as the labyrinth. */
 .holo-glass {
   background: linear-gradient(
     165deg,
-    rgba(140, 216, 211, 0.24),
-    rgba(27, 31, 39, 0.14) 55%,
-    rgba(140, 216, 211, 0.1)
+    rgba(27, 31, 39, 0.78),
+    rgba(16, 20, 27, 0.55) 55%,
+    rgba(192, 133, 82, 0.12)
   );
-  backdrop-filter: blur(6px) saturate(1.25);
-  border: 1px solid rgba(140, 216, 211, 0.5);
+  backdrop-filter: blur(8px) saturate(1.2);
+  border: 1px solid rgba(226, 173, 122, 0.38);
   box-shadow:
-    0 8px 40px rgba(27, 31, 39, 0.28),
-    0 0 26px rgba(111, 211, 207, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 14px 44px rgba(4, 6, 10, 0.5),
+    0 0 22px rgba(192, 133, 82, 0.18),
+    inset 0 1px 0 rgba(236, 233, 225, 0.18);
 }
 
-/* CRT-like scanlines laid over the live preview */
-.holo-scan {
-  background-image: repeating-linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.055) 0 1px,
-    transparent 1px 3px
+/* Depth fog inside a gate window: dark at the floor, faint copper above */
+.holo-fog {
+  background: linear-gradient(
+    to top,
+    rgba(16, 20, 27, 0.5),
+    transparent 45%,
+    rgba(226, 173, 122, 0.07)
   );
-}
-
-@keyframes holo-pulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.85; }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .beam-pulse { animation: holo-pulse 3.4s ease-in-out infinite; }
 }
