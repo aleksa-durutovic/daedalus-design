@@ -6,7 +6,7 @@
  *  - Nav binds a global Esc handler that jumps to the top of the page. It
  *    skips that handler while any overlay is open, so pressing Esc to close
  *    a dialog does not ALSO scroll the visitor to the hero.
- *  - HistoryGuard turns a browser Back press into "close the top overlay"
+ *  - SiteHistory turns a browser Back press into "close the top overlay"
  *    instead of leaving the site, via closeTopOverlay().
  *
  * An overlay registers with pushOverlay(close) and gets back an unregister

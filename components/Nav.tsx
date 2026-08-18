@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Dictionary, Locale } from "@/types/content";
 import { t } from "@/content/i18n";
 import { isOverlayOpen } from "@/lib/overlayState";
+import { isSectionKey, navigateToSection } from "@/lib/sections";
 import LanguageToggle from "@/components/LanguageToggle";
 
 interface NavProps {
@@ -75,9 +76,8 @@ export default function Nav({ dict, locale }: NavProps) {
       const el = e.target as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
       setMenuOpen(false);
-      // Instant, not smooth: mandatory scroll-snap sections swallow smooth
-      // programmatic scrolls (same reason HoloDeck lands sections instantly).
-      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+      // Esc → landing, recorded like any other navigation.
+      navigateToSection("hero");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -86,7 +86,10 @@ export default function Nav({ dict, locale }: NavProps) {
   function handleNavClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
     e.preventDefault();
     setMenuOpen(false);
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    // href is "#services" etc. navigateToSection scrolls (instant — snap
+    // swallows smooth) and records the move as a history entry.
+    const key = href.slice(1);
+    if (isSectionKey(key)) navigateToSection(key);
   }
 
   return (
@@ -103,7 +106,7 @@ export default function Nav({ dict, locale }: NavProps) {
             onClick={(e) => {
               e.preventDefault();
               setMenuOpen(false);
-              window.scrollTo({ top: 0, behavior: "smooth" });
+              navigateToSection("hero");
             }}
             className="group flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
           >

@@ -18,6 +18,7 @@ import SectionBackdrop from "@/components/SectionBackdrop";
 import { MAZE_SIZE, corridorPath, ptN, wallsNear } from "@/lib/mazeGeometry";
 import { useApertureCanvas } from "@/lib/mazeRaster";
 import { DEPTH, usePointerParallax } from "@/lib/pointer";
+import { navigateToSection } from "@/lib/sections";
 import { pushOverlay } from "@/lib/overlayState";
 
 /**
@@ -434,7 +435,8 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
   const sy = useTransform(rawY, (v) => v * DEPTH.gate);
 
   function scrollToTarget(key: PanelKey) {
-    document.getElementById(key)?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
+    // Record the landing as a history entry (PanelKey ⊂ SectionKey).
+    navigateToSection(key);
   }
 
   function open(panel: PanelDef) {
@@ -504,7 +506,7 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
   }, [active]);
 
   // Register the expansion while it is on screen: Nav stands down from its
-  // Esc handler, and a browser Back press (via HistoryGuard) returns to the
+  // Esc handler, and a browser Back press (via SiteHistory) returns to the
   // floating deck rather than leaving the site.
   useEffect(() => {
     if (!active) return;

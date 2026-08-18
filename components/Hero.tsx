@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { Dictionary } from "@/types/content";
 import { t } from "@/content/i18n";
+import { navigateToSection } from "@/lib/sections";
 import HoloDeck from "@/components/HoloDeck";
 import MazeScene from "@/components/MazeScene";
 
@@ -22,7 +23,7 @@ const item = {
 
 export default function Hero({ dict }: HeroProps) {
   return (
-    <section className="relative h-svh snap-start snap-always overflow-hidden">
+    <section id="hero" className="relative h-svh snap-start snap-always overflow-hidden">
       {/* The labyrinth itself — a 3D maze vortex, not a printed pattern */}
       <MazeScene />
 
@@ -63,7 +64,7 @@ export default function Hero({ dict }: HeroProps) {
               href="#contact"
               onClick={(e) => {
                 e.preventDefault();
-                document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+                navigateToSection("contact");
               }}
               className="liquid-glass-button group inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-display text-sm font-semibold tracking-wide text-fg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
             >

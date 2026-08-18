@@ -46,8 +46,13 @@ export default function ShowcaseDialog({ item, dict, onClose, onCta }: ShowcaseD
     const previouslyFocused = document.activeElement as HTMLElement | null;
     // Focus the close button rather than the demo, so a keyboard user lands
     // on the exit before wandering into a playground.
-    closeRef.current?.focus();
-    return () => previouslyFocused?.focus?.();
+    // preventScroll on BOTH calls: the panel is position:fixed, so focusing
+    // anything in it must not scroll the page — and, crucially, the restore
+    // must not scroll the page back to the card the dialog opened from. That
+    // restore-scroll was yanking the "I want a site like this" CTA back to
+    // the portfolio the instant it tried to reach the contact section.
+    closeRef.current?.focus({ preventScroll: true });
+    return () => previouslyFocused?.focus?.({ preventScroll: true });
   }, []);
 
   // Esc + focus trap.

@@ -8,11 +8,12 @@ import { CONTACT_EMAIL } from "@/content/social";
 
 interface ContactProps {
   dict: Dictionary;
-  /** Preview mode (holo windows/overlay): no id so anchors stay unique. */
+  /** Accepted for parity with the other sections (gate expansion passes it);
+      Contact renders the same either way now that its id lives on the section. */
   mini?: boolean;
 }
 
-export default function Contact({ dict, mini }: ContactProps) {
+export default function Contact({ dict }: ContactProps) {
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<number | undefined>(undefined);
 
@@ -51,7 +52,7 @@ export default function Contact({ dict, mini }: ContactProps) {
   return (
     // Root is a div: the full-screen snap <section> (shared with the footer)
     // lives in app/page.tsx.
-    <div id={mini ? undefined : "contact"} className="m-auto w-full max-w-4xl px-6 pb-10 pt-24">
+    <div className="m-auto w-full max-w-4xl px-6 pb-10 pt-24">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
