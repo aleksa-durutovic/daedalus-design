@@ -5,9 +5,8 @@ import {
   AnimatePresence,
   motion,
   MotionConfig,
-  useMotionValue,
   useReducedMotion,
-  useSpring,
+  useTransform,
 } from "framer-motion";
 import type { Dictionary } from "@/types/content";
 import { t } from "@/content/i18n";
@@ -17,6 +16,8 @@ import About from "@/components/About";
 import Contact from "@/components/Contact";
 import SectionBackdrop from "@/components/SectionBackdrop";
 import { MAZE_SIZE, corridorPath, ptN, wallsNear } from "@/lib/mazeGeometry";
+import { useApertureCanvas } from "@/lib/mazeRaster";
+import { DEPTH, usePointerParallax } from "@/lib/pointer";
 import { popOverlay, pushOverlay } from "@/lib/overlayState";
 
 /**
@@ -59,7 +60,7 @@ const VH = 800;
 const PANEL_W_MOBILE = 150;
 const FRAME_PAD = 10; // aperture frame visible around the preview
 const TITLE_H = 27; // approx title bar height (border included)
-const T0 = 0.35; // reveal theater start: corridors draw → gates pop → windows iris
+const T0 = 0.15; // reveal theater start: corridors draw → gates pop → windows iris
 
 const BASE: PanelBase[] = [
   { key: "services", labelKey: "nav.services", variant: "corner" },
@@ -219,34 +220,19 @@ function GatePoster({ panel, width }: { panel: PanelBase; width: number }) {
  * direction away from the core points up. Each window literally frames a
  * different part of the labyrinth.
  */
-function Aperture({ angle, r }: { angle: number; r: number }) {
-  const [gx, gy] = ptN(r, angle);
-  const rot = -90 - angle; // outward direction → up
+function Aperture({ angle, r, w, h }: { angle: number; r: number; w: number; h: number }) {
+  const gate = useMemo(() => ptN(r, angle), [r, angle]);
   const walls = useMemo(() => wallsNear(r, 160), [r]);
+  const rot = -90 - angle; // outward direction → up
+  // Rasterised: this was 214 live <path> elements per gate, ×4 gates.
+  const ref = useApertureCanvas(walls, gate, rot, w, h);
   return (
-    <svg
+    <canvas
+      ref={ref}
       aria-hidden="true"
       className="absolute inset-0 h-full w-full"
-      viewBox={`${(gx - 230).toFixed(1)} ${(gy - 230).toFixed(1)} 460 460`}
-      preserveAspectRatio="xMidYMid slice"
-      fill="none"
-    >
-      <g
-        transform={`rotate(${rot.toFixed(1)} ${gx.toFixed(1)} ${gy.toFixed(1)})`}
-        strokeLinecap="round"
-      >
-        <g stroke="#04060a" strokeOpacity="0.5">
-          {walls.map((wall, i) => (
-            <path key={`s${i}`} d={wall.d} strokeWidth={wall.w + 1} transform={`translate(0 ${wall.dy.toFixed(2)})`} />
-          ))}
-        </g>
-        <g strokeOpacity="0.4">
-          {walls.map((wall, i) => (
-            <path key={`t${i}`} d={wall.d} stroke={wall.color} strokeWidth={wall.w} />
-          ))}
-        </g>
-      </g>
-    </svg>
+      style={{ width: w, height: h }}
+    />
   );
 }
 
@@ -329,8 +315,8 @@ function HoloPanel({
         initial={reduce ? { opacity: 0 } : { opacity: 0, clipPath: "circle(9% at 50% 62%)" }}
         animate={reduce ? { opacity: 1 } : { opacity: 1, clipPath: "circle(140% at 50% 62%)" }}
         transition={{
-          delay: T0 + 0.6 + index * 0.14,
-          duration: reduce ? 0.45 : 0.8,
+          delay: T0 + 0.34 + index * 0.08,
+          duration: reduce ? 0.3 : 0.5,
           ease: [0.16, 1, 0.3, 1],
         }}
       >
@@ -352,7 +338,9 @@ function HoloPanel({
           </div>
           {/* Aperture frame: the maze region under this gate, preview inset */}
           <div className="relative" style={{ padding: FRAME_PAD }}>
-            <Aperture angle={panel.angle} r={panel.r} />
+            {/* Aperture fills this padded frame: full panel width, and the
+                panel height minus the title bar. */}
+            <Aperture angle={panel.angle} r={panel.r} w={width} h={h - TITLE_H} />
             {/* Copper light pooling up from the gate below */}
             <div
               aria-hidden="true"
@@ -392,11 +380,13 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
   }, []);
   const [active, setActive] = useState<PanelDef | null>(null);
   const [hovered, setHovered] = useState<PanelKey | null>(null);
-  // 'opening' → layout morph runs; 'handoff' → layoutId dropped, fading out
+  // Gate rect captured at click, expressed as the transform that maps the
+  // fullscreen overlay onto it — the overlay animates from this to identity.
+  const [origin, setOrigin] = useState<{ scale: number; x: number; y: number } | null>(null);
+  // 'opening' → the zoom runs; 'handoff' → landed, fading out
   const phaseRef = useRef<"idle" | "opening" | "handoff">("idle");
   // Mirror of `active` for timers/callbacks whose closures predate setState.
   const activeRef = useRef<PanelDef | null>(null);
-  const [, forceRender] = useState(0);
 
   // Render floating deck vs mobile grid via JS (CSS hiding would mount two
   // elements with the same layoutId, which breaks the shared morph).
@@ -434,22 +424,14 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
     };
   }, []);
 
-  // Mouse parallax for the whole gate layer (corridors + windows together,
-  // so they never separate). Same inverted direction as the maze bands,
-  // sized between band 1 and 2 — the gates float mid-depth.
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const sx = useSpring(px, { stiffness: 60, damping: 18 });
-  const sy = useSpring(py, { stiffness: 60, damping: 18 });
-  useEffect(() => {
-    if (reduce || isMobile) return;
-    const onMove = (e: MouseEvent) => {
-      px.set((e.clientX / window.innerWidth - 0.5) * -12);
-      py.set((e.clientY / window.innerHeight - 0.5) * -8);
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [reduce, isMobile, px, py]);
+  // Parallax for the whole gate layer (corridors + windows together, so they
+  // never separate). Same source, sign and spring as the maze — previously
+  // this had its own listener, its own spring, and a different multiplier on
+  // x than on y, so the gates travelled on a different arc from the maze.
+  // DEPTH.gate is the largest factor: the gates float nearest the camera.
+  const { sx: rawX, sy: rawY } = usePointerParallax(reduce || isMobile);
+  const sx = useTransform(rawX, (v) => v * DEPTH.gate);
+  const sy = useTransform(rawY, (v) => v * DEPTH.gate);
 
   function scrollToTarget(key: PanelKey) {
     document.getElementById(key)?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
@@ -458,16 +440,32 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
   function open(panel: PanelDef) {
     // Reduced motion gets the SAME journey, quietly: the overlay still opens
     // and still hands off to the real section — it simply crossfades instead
-    // of morphing, and lands sooner. (It used to jump straight to the
+    // of zooming, and lands sooner. (It used to jump straight to the
     // section, which skipped the whole interaction.)
     phaseRef.current = "opening";
     activeRef.current = panel;
+
+    // Where the gate sits right now, so the overlay can zoom out of it using
+    // nothing but transform + opacity. This replaced a shared-layoutId morph,
+    // which re-read and re-wrote layout on every frame — the single most
+    // expensive thing that used to happen during a page change.
+    const rect = document.getElementById(`holo-btn-${panel.key}`)?.getBoundingClientRect();
+    setOrigin(
+      rect
+        ? {
+            scale: Math.max(rect.width / window.innerWidth, 0.05),
+            x: rect.left + rect.width / 2 - window.innerWidth / 2,
+            y: rect.top + rect.height / 2 - window.innerHeight / 2,
+          }
+        : null
+    );
+
     document.documentElement.style.overflow = "hidden";
     setActive(panel);
-    // Safety net: without a layout animation `onLayoutAnimationComplete`
-    // never fires, so the timer is the only handoff path in quiet mode.
-    // Guarded by phaseRef → a no-op if the morph completed or Esc was hit.
-    window.setTimeout(handoff, reduce ? 420 : 1200);
+    // Safety net in case the animation never reports completion (interrupted,
+    // or a hidden tab where rAF stops). Guarded by phaseRef → a no-op if the
+    // zoom already completed or Esc was hit.
+    window.setTimeout(handoff, reduce ? 300 : 450);
   }
 
   function closeBack() {
@@ -481,18 +479,17 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
   }
 
   function handoff() {
-    // Morph finished → land on the real section and fade the overlay away.
+    // Zoom finished → land on the real section and fade the overlay away.
     const panel = activeRef.current;
     if (phaseRef.current !== "opening" || !panel) return;
     phaseRef.current = "handoff";
-    forceRender((n) => n + 1); // re-render overlay without layoutId
     document.documentElement.style.overflow = "";
     scrollToTarget(panel.key);
     window.setTimeout(() => {
       phaseRef.current = "idle";
       activeRef.current = null;
       setActive(null);
-    }, 380);
+    }, 240);
   }
 
   // Esc while the overlay is mid-morph → back to the floating deck (the
@@ -580,7 +577,7 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
                         strokeLinecap="round"
                         initial={reduce ? false : { pathLength: 0 }}
                         animate={{ pathLength: 1 }}
-                        transition={{ delay: T0 + i * 0.14, duration: 0.7, ease: "easeOut" }}
+                        transition={{ delay: T0 + i * 0.08, duration: 0.45, ease: "easeOut" }}
                       />
                       {/* Copper light along the path */}
                       <motion.path
@@ -592,7 +589,7 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
                         style={{ filter: "drop-shadow(0 0 6px rgba(192,133,82,0.55))" }}
                         initial={reduce ? false : { pathLength: 0 }}
                         animate={{ pathLength: 1 }}
-                        transition={{ delay: T0 + i * 0.14, duration: 0.7, ease: "easeOut" }}
+                        transition={{ delay: T0 + i * 0.08, duration: 0.45, ease: "easeOut" }}
                       />
                       {/* Traveling pulse — light walking the corridor outward */}
                       {!reduce && (
@@ -606,7 +603,7 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
                           strokeDasharray="0.07 0.93"
                           animate={{ strokeDashoffset: [0, -1] }}
                           transition={{
-                            delay: T0 + 0.7 + i * 0.35,
+                            delay: T0 + 0.45 + i * 0.3,
                             duration: 3.2,
                             repeat: Infinity,
                             ease: "linear",
@@ -621,8 +618,8 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
                         animate={reduce ? { opacity: 1 } : { scale: 1, opacity: 1 }}
                         transition={
                           reduce
-                            ? { delay: T0 + 0.55 + i * 0.14, duration: 0.4 }
-                            : { delay: T0 + 0.55 + i * 0.14, type: "spring", stiffness: 260, damping: 18 }
+                            ? { delay: T0 + 0.3 + i * 0.08, duration: 0.28 }
+                            : { delay: T0 + 0.3 + i * 0.08, type: "spring", stiffness: 320, damping: 20 }
                         }
                       >
                         <circle cx={gx} cy={gy} r={13} stroke="#e2ad7a" strokeOpacity={lit ? 0.9 : 0.5} strokeWidth={2} />
@@ -676,21 +673,27 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
         )}
       </div>
 
-      {/* Fullscreen expansion — the gate "opens into" the real section */}
+      {/* Fullscreen expansion — the gate "opens into" the real section.
+          Zooms out of the gate using transform + opacity ONLY. This was a
+          shared-layoutId morph, which projects layout every frame — over a
+          hero this heavy it was the main reason changing page felt sluggish.
+          Scale is uniform so nothing distorts, and the fade covers the
+          difference between the gate's aspect and the viewport's. Quiet mode
+          skips straight to the crossfade. */}
       <AnimatePresence>
         {active && (
           <motion.div
             key={active.key}
-            // Quiet mode drops the shared-layout morph entirely (it is pure
-            // transform) and crossfades in its place.
-            layoutId={
-              reduce || phaseRef.current === "handoff" ? undefined : `holo-${active.key}`
+            initial={
+              reduce || !origin
+                ? { opacity: 0 }
+                : { opacity: 0, scale: origin.scale, x: origin.x, y: origin.y }
             }
-            onLayoutAnimationComplete={handoff}
-            initial={reduce ? { opacity: 0 } : false}
-            animate={reduce ? { opacity: 1 } : undefined}
-            exit={{ opacity: 0, transition: { duration: 0.3 } }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.22 } }}
+            transition={{ duration: reduce ? 0.25 : 0.45, ease: [0.16, 1, 0.3, 1] }}
+            onAnimationComplete={handoff}
+            style={{ transformOrigin: "center center", willChange: "transform, opacity" }}
             className="fixed inset-0 z-[60] overflow-hidden bg-abyss"
           >
             {/* No close button by design: Esc is the way back (handled above

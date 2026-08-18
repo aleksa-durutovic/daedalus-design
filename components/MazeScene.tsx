@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
-import { BANDS, type BandDef } from "@/lib/mazeGeometry";
+import { motion, useReducedMotion, useTransform } from "framer-motion";
+import { BANDS, MAZE_SIZE, type BandDef } from "@/lib/mazeGeometry";
+import { useBandCanvas } from "@/lib/mazeRaster";
+import { DEPTH, usePointerParallax } from "@/lib/pointer";
 
 /**
  * MazeScene — the landing-page world: a vast circular labyrinth seen from
@@ -20,7 +21,18 @@ import { BANDS, type BandDef } from "@/lib/mazeGeometry";
  * exact same walls for its window apertures and corridors.
  */
 
-/** One parallax band rendered as its own full-bleed SVG. */
+/**
+ * One parallax band, rasterised into a single canvas.
+ *
+ * Each band keeps its own canvas rather than sharing one bitmap, because the
+ * three bands parallax at different rates and the middle one revolves — so
+ * they must stay independently transformable. What changed is that the
+ * transform now moves ONE composited layer instead of a couple of hundred
+ * live SVG paths.
+ *
+ * The canvas is a 100vmax square: for a square bitmap in a viewport-sized
+ * box that is exactly what `preserveAspectRatio="xMidYMid slice"` did.
+ */
 function Band({
   band,
   x,
@@ -32,6 +44,7 @@ function Band({
   y: ReturnType<typeof useTransform<number, number>>;
   reduce: boolean;
 }) {
+  const ref = useBandCanvas(band.walls);
   return (
     <motion.div className="absolute inset-0" style={{ x, y }}>
       <motion.div
@@ -39,30 +52,13 @@ function Band({
         animate={band.revolve && !reduce ? { rotate: 360 } : undefined}
         transition={{ duration: 420, repeat: Infinity, ease: "linear" }}
       >
-        <svg
-          className="absolute inset-0 h-full w-full"
-          viewBox="0 0 1440 1440"
-          preserveAspectRatio="xMidYMid slice"
-          fill="none"
-        >
-          {/* Under-edges first (the dark drop that makes walls stand up) */}
-          <g stroke="#04060a" strokeOpacity="0.75" strokeLinecap="round">
-            {band.walls.map((wall, i) => (
-              <path
-                key={`s${i}`}
-                d={wall.d}
-                strokeWidth={wall.w + 1}
-                transform={`translate(0 ${wall.dy.toFixed(2)})`}
-              />
-            ))}
-          </g>
-          {/* Lit top faces */}
-          <g strokeLinecap="round" strokeOpacity="0.85">
-            {band.walls.map((wall, i) => (
-              <path key={`t${i}`} d={wall.d} stroke={wall.color} strokeWidth={wall.w} />
-            ))}
-          </g>
-        </svg>
+        <canvas
+          ref={ref}
+          width={MAZE_SIZE}
+          height={MAZE_SIZE}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          style={{ width: "100vmax", height: "100vmax" }}
+        />
       </motion.div>
     </motion.div>
   );
@@ -71,26 +67,14 @@ function Band({
 export default function MazeScene() {
   const reduce = useReducedMotion() ?? false;
 
-  // Mouse parallax shared by all bands; each band scales it by depth.
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const sx = useSpring(px, { stiffness: 45, damping: 20 });
-  const sy = useSpring(py, { stiffness: 45, damping: 20 });
+  // Pointer parallax comes from the page-wide source in lib/pointer, so the
+  // maze and the gates in front of it move on one shared curve.
+  const { sx, sy } = usePointerParallax(reduce);
   const layers = [
-    { x: useTransform(sx, (v) => v * BANDS[0].mult), y: useTransform(sy, (v) => v * BANDS[0].mult) },
-    { x: useTransform(sx, (v) => v * BANDS[1].mult), y: useTransform(sy, (v) => v * BANDS[1].mult) },
-    { x: useTransform(sx, (v) => v * BANDS[2].mult), y: useTransform(sy, (v) => v * BANDS[2].mult) },
+    { x: useTransform(sx, (v) => v * DEPTH.band[0]), y: useTransform(sy, (v) => v * DEPTH.band[0]) },
+    { x: useTransform(sx, (v) => v * DEPTH.band[1]), y: useTransform(sy, (v) => v * DEPTH.band[1]) },
+    { x: useTransform(sx, (v) => v * DEPTH.band[2]), y: useTransform(sy, (v) => v * DEPTH.band[2]) },
   ];
-
-  useEffect(() => {
-    if (reduce) return;
-    const onMove = (e: MouseEvent) => {
-      px.set((e.clientX / window.innerWidth - 0.5) * -1);
-      py.set((e.clientY / window.innerHeight - 0.5) * -1);
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [reduce, px, py]);
 
   return (
     <motion.div

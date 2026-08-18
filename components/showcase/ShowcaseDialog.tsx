@@ -112,7 +112,7 @@ export default function ShowcaseDialog({ item, dict, onClose, onCta }: ShowcaseD
         initial={{ scale: 0.94, y: 14, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.96, opacity: 0, transition: { duration: 0.18 } }}
-        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
         className="holo-glass relative z-10 flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-none sm:h-auto sm:max-h-[86svh] sm:rounded-2xl"
       >
         {/* Title bar — matches the hero's gate windows */}
@@ -139,7 +139,7 @@ export default function ShowcaseDialog({ item, dict, onClose, onCta }: ShowcaseD
         <motion.div
           initial={reduce ? { opacity: 0 } : { opacity: 0, clipPath: "circle(12% at 50% 45%)" }}
           animate={reduce ? { opacity: 1 } : { opacity: 1, clipPath: "circle(140% at 50% 45%)" }}
-          transition={{ duration: reduce ? 0.35 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduce ? 0.25 : 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-y-auto lg:grid-cols-[1.15fr_1fr]"
         >
           {/* The playable demo */}
