@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Dictionary, ShowcaseItem } from "@/types/content";
 import { t } from "@/content/i18n";
 import { showcase } from "@/content/portfolio";
-import { popOverlay, pushOverlay } from "@/lib/overlayState";
+import { pushOverlay } from "@/lib/overlayState";
 import SectionBackdrop from "@/components/SectionBackdrop";
 import { Demo } from "@/components/showcase/demos";
 import ShowcaseDialog from "@/components/showcase/ShowcaseDialog";
@@ -36,18 +36,23 @@ export default function Portfolio({ dict, mini }: PortfolioProps) {
     const html = document.documentElement;
     const prev = html.style.overflow;
     html.style.overflow = "hidden";
-    pushOverlay();
+    // Register the closer so a browser Back press (via HistoryGuard) closes
+    // the dialog instead of leaving the site.
+    const off = pushOverlay(() => setOpen(null));
     return () => {
       html.style.overflow = prev;
-      popOverlay();
+      off();
     };
   }, [open]);
 
   function goToContact() {
     setOpen(null);
-    // Let the dialog release the scroll lock before we move.
+    // Let the dialog's effect cleanup release the scroll lock, THEN jump.
+    // Must be "instant": the page is snap-mandatory (app/layout.tsx), which
+    // swallows smooth programmatic scrolls — the reason Nav and HoloDeck also
+    // scroll instantly. With "smooth" the CTA appeared to do nothing.
     window.setTimeout(() => {
-      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("contact")?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
     }, 60);
   }
 

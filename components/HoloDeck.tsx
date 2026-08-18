@@ -18,7 +18,7 @@ import SectionBackdrop from "@/components/SectionBackdrop";
 import { MAZE_SIZE, corridorPath, ptN, wallsNear } from "@/lib/mazeGeometry";
 import { useApertureCanvas } from "@/lib/mazeRaster";
 import { DEPTH, usePointerParallax } from "@/lib/pointer";
-import { popOverlay, pushOverlay } from "@/lib/overlayState";
+import { pushOverlay } from "@/lib/overlayState";
 
 /**
  * HoloDeck — four GATES of the labyrinth. Each window is a live, scaled-down
@@ -503,12 +503,12 @@ export default function HoloDeck({ dict }: HoloDeckProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [active]);
 
-  // Claim Esc from Nav for as long as the expansion is on screen (released
-  // on unmount, i.e. after the keydown that closed it has finished).
+  // Register the expansion while it is on screen: Nav stands down from its
+  // Esc handler, and a browser Back press (via HistoryGuard) returns to the
+  // floating deck rather than leaving the site.
   useEffect(() => {
     if (!active) return;
-    pushOverlay();
-    return popOverlay;
+    return pushOverlay(closeBack);
   }, [active]);
 
   const defs = LAYOUTS[layout];

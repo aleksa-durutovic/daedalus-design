@@ -1,6 +1,5 @@
 import type { Dictionary } from "@/types/content";
 import { t } from "@/content/i18n";
-import { socialLinks } from "@/content/social";
 
 interface FooterProps {
   dict: Dictionary;
@@ -16,21 +15,6 @@ export default function Footer({ dict, className = "" }: FooterProps) {
         <p className="text-sm text-muted">
           © {year} Daedalus Design. {t(dict, "footer.rights")}
         </p>
-
-        <ul className="flex items-center gap-5">
-          {socialLinks.map((link) => (
-            <li key={link.label}>
-              <a
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
 
         <a
           href="#top"

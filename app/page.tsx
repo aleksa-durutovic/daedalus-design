@@ -2,6 +2,7 @@ import { MotionConfig } from "framer-motion";
 import { getLocale } from "@/lib/getLocale";
 import { dictionaries } from "@/content/i18n";
 import Nav from "@/components/Nav";
+import HistoryGuard from "@/components/HistoryGuard";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
 import Portfolio from "@/components/Portfolio";
@@ -18,6 +19,7 @@ export default async function Home() {
     // Shared reduced-motion gate: every Framer Motion animation below
     // respects the OS "reduce motion" setting through this single config.
     <MotionConfig reducedMotion="user">
+      <HistoryGuard />
       <Nav dict={dict} locale={locale} />
       <main id="content">
         <Hero dict={dict} />
